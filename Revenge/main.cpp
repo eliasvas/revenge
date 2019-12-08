@@ -106,7 +106,6 @@ int main(int argc, char *argv[])
 	bool antialiasing = false;
 	int speed = 1;
 	bool show_options = false;
-	const char* glsl_version = "#version 330";
 	//Initialize
 	if (init() == false)
 	{
