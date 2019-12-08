@@ -1,0 +1,8 @@
+-load the models
+-make the grid
+-put music
+-implement sphere collisions
+-make a linked list implementation of the movement of the horde
+-make the animation and path of the skeleton-pirates
+-make the tile selecter to build the tower
+-fix imgui navigation issues
