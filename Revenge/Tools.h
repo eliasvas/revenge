@@ -1,4 +1,6 @@
 #include <string>
+#include <iostream>
+#include <glm/gtx/string_cast.hpp>
 #include "GLEW\glew.h"
 
 #ifndef TOOLS_H

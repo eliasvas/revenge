@@ -14,7 +14,7 @@ using namespace std;
 //Screen attributes
 SDL_Window * window;
 Mix_Music *music = NULL;
-int music_volume = 20;
+int music_volume = 5;
 //OpenGL context 
 SDL_GLContext gContext;
 const int SCREEN_WIDTH = 1380;	//800;	//640;

@@ -11,7 +11,7 @@ int tilemap[]={ 1, 1, 1, 0 ,
 				1, 0, 1, 1,
 				1, 0, 0, 1,
 				1, 0, 0, 1
-				};
+			   };
 int tilemap_width = 4;
 int tilemap_height = 4;
 // RENDERER
@@ -293,48 +293,58 @@ void Renderer::RenderGeometry()
 	glUniform1i(m_geometry_rendering_program["uniform_diffuse_texture"], 0);
 	glActiveTexture(GL_TEXTURE0);
 
-	// draw the first object
-	glBindVertexArray(terrain->m_vao);
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(terrain_transformation_matrix));
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(terrain_transformation_normal_matrix));
-	for (int j = 0; j < terrain->parts.size(); j++)
-	{
-		glm::vec3 diffuseColor = terrain->parts[j].diffuseColor;
-		glm::vec3 specularColor = terrain->parts[j].specularColor;
-		float shininess = terrain->parts[j].shininess;
+	//Draw Tiles 
+	glm::mat4 transform = terrain_transformation_matrix;
+	for (int y = 0; y < 4; ++y) {
+		for (int x = 0; x < 4; ++x) {
+			
+			//std::cout << glm::to_string(transform) << std::endl;
+			if (tilemap[x + y*4] == 0) {
+				//draw terrain
+				glBindVertexArray(terrain->m_vao);
+				glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transform));
+				glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(terrain_transformation_normal_matrix));
+				for (int j = 0; j < terrain->parts.size(); j++)
+				{
+					glm::vec3 diffuseColor = terrain->parts[j].diffuseColor;
+					glm::vec3 specularColor = terrain->parts[j].specularColor;
+					float shininess = terrain->parts[j].shininess;
 
-		glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
-		glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
-		glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
-		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (terrain->parts[j].textureID > 0) ? 1.0f : 0.0f);
-		glBindTexture(GL_TEXTURE_2D, terrain->parts[j].textureID);
+					glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+					glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+					glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
+					glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (terrain->parts[j].textureID > 0) ? 1.0f : 0.0f);
+					glBindTexture(GL_TEXTURE_2D, terrain->parts[j].textureID);
 
-		glDrawArrays(GL_TRIANGLES, terrain->parts[j].start_offset, terrain->parts[j].count);
+					glDrawArrays(GL_TRIANGLES, terrain->parts[j].start_offset, terrain->parts[j].count);
+				}
+
+			}
+			else if (tilemap[x + y * 4] == 1) {
+				glBindVertexArray(road->m_vao);
+				glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transform));
+				glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(road_transformation_normal_matrix));
+				for (int j = 0; j < road->parts.size(); ++j) {
+					glm::vec3 diffuseColor = road->parts[j].diffuseColor;
+					glm::vec3 specularColor = road->parts[j].specularColor;
+					float shininess = road->parts[j].shininess;
+
+					glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+					glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+					glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
+					glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (road->parts[j].textureID > 0) ? 1.0f : 0.0f);
+					glBindTexture(GL_TEXTURE_2D, road->parts[j].textureID);
+
+					glDrawArrays(GL_TRIANGLES, road->parts[j].start_offset, road->parts[j].count);
+
+				}
+			}
+			transform = glm::translate(transform, glm::vec3(2, 0, 0));//y += 2; //2 is arbitary due to the [-1,1] size of our tiles
+		}
+		transform = terrain_transformation_matrix;
+		transform = glm::translate(transform,glm::vec3(0, 0,2*(y+1)));//x += 2;
 	}
-
-	// draw the second object
-	// ..
-	glBindVertexArray(road->m_vao);
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(road_transformation_matrix));
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(road_transformation_normal_matrix));
-	for (int j = 0; j < road->parts.size(); ++j) {
-		glm::vec3 diffuseColor = road->parts[j].diffuseColor;
-		glm::vec3 specularColor = road->parts[j].specularColor;
-		float shininess = road->parts[j].shininess;
-
-		glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
-		glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
-		glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
-		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (road->parts[j].textureID > 0) ? 1.0f : 0.0f);
-		glBindTexture(GL_TEXTURE_2D, road->parts[j].textureID);
-
-		glDrawArrays(GL_TRIANGLES, road->parts[j].start_offset, road->parts[j].count);
-
-	}
-
-	// draw the third object
-	// ..
-
+	
 	// unbind the vao
 	glBindVertexArray(0);
 	// unbind the shader program
