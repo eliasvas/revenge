@@ -2,16 +2,19 @@
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_mixer.h"
 #include <iostream>
 #include <chrono>
 #include "GLEW\glew.h"
 #include "Renderer.h"
 #include <thread>         // std::this_thread::sleep_for
+#include "Tools.h"
 using namespace std;
 
 //Screen attributes
 SDL_Window * window;
-
+Mix_Music *music = NULL;
+int music_volume = 20;
 //OpenGL context 
 SDL_GLContext gContext;
 const int SCREEN_WIDTH = 1380;	//800;	//640;
@@ -38,11 +41,28 @@ void func()
 // initialize SDL and OpenGL
 bool init()
 {
+	if (0)
+	{
+		SDL_version compiled;
+		SDL_version linked;
+
+		SDL_VERSION(&compiled);
+		SDL_GetVersion(&linked);
+		printf("We compiled against SDL version %d.%d.%d ...\n",
+			compiled.major, compiled.minor, compiled.patch);
+		printf("But we are linking against SDL version %d.%d.%d.\n",
+			linked.major, linked.minor, linked.patch);
+	}
 	//Initialize SDL
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
 		return false;
 	}
+
+
+	int audio_rate = 22050; Uint16 audio_format = AUDIO_S16SYS; int audio_channels = 2; int audio_buffers = 4096; 
+if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0) { fprintf(stderr, "Unable to initialize audio: %s\n", Mix_GetError()); exit(1); } 
+
 
 	// use Double Buffering
 	if (SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1) < 0)
@@ -85,6 +105,8 @@ bool init()
 	renderer = new Renderer();
 	bool engine_initialized = renderer->Init(SCREEN_WIDTH, SCREEN_HEIGHT);
 
+	music = Mix_LoadMUS( "C:/Users/user/Desktop/Revenge/Data/Sounds/background_music.wav" );
+	if (music == nullptr)return 666;
 	//atexit(func);
 
 	return engine_initialized;
@@ -124,13 +146,15 @@ int main(int argc, char *argv[])
 	glm::vec2 prev_mouse_position(0);
 
 	auto simulation_start = chrono::steady_clock::now();
-
+	Mix_PlayMusic(music,-1);
 	// Wait for user exit
 	while (quit == false)
 	{
+		Mix_VolumeMusic(music_volume);
 		// While there are events to handle
 		while (SDL_PollEvent(&event))
 		{
+
 			if (fullscreen)ToggleFullscreen(window);
 			if (event.type == SDL_QUIT)
 			{
@@ -256,6 +280,7 @@ int main(int argc, char *argv[])
 				ImGui::Begin("options",0, ImGuiWindowFlags_AlwaysAutoResize);
 				ImGui::Checkbox("anti-aliasing", &antialiasing);
 				ImGui::Checkbox("fullscreen", &fullscreen);
+				ImGui::SliderInt("volume", &music_volume, 0.0f, MIX_MAX_VOLUME);
 				ImGui::SliderInt("speed", &speed, 0.0f, 8.0f);
 				ImGui::End();
 			}

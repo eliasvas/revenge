@@ -7,12 +7,19 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "OBJLoader.h"
 
+int tilemap[]={ 1, 1, 1, 0 ,
+				1, 0, 1, 1,
+				1, 0, 0, 1,
+				1, 0, 0, 1
+				};
+int tilemap_width = 4;
+int tilemap_height = 4;
 // RENDERER
 Renderer::Renderer()
 {	
-	m_geometric_object1 = nullptr;
-	m_geometric_object2 = nullptr;
-	m_geometric_object3 = nullptr;
+	terrain = nullptr;
+	road = nullptr;
+	green_plane = nullptr;
 
 	m_rendering_mode = RENDERING_MODE::TRIANGLES;	
 	m_continous_time = 0.0;
@@ -23,9 +30,9 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
-	delete m_geometric_object1;
-	delete m_geometric_object2;
-	delete m_geometric_object3;
+	delete terrain;
+	delete road;
+	delete green_plane;
 }
 
 bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
@@ -103,8 +110,6 @@ void Renderer::Update(float dt)
 	// Update object1 ...
 
 	// Update object2 ...
-	glm::mat4 t = glm::translate(m_geometric_object2_transformation_matrix,glm::vec3(1,0,0));
-	m_geometric_object2_transformation_matrix = t;
 	// Update object3 ...
 
 }
@@ -195,12 +200,13 @@ bool Renderer::InitGeometricMeshes()
 {
 	bool initialized = true;
 	OBJLoader loader;
+	//transform = glm::vec3(i*2,j*2,0); obj = tiles[j*width + i]
 	// load geometric object 1
 	auto mesh = loader.load("../Data/Terrain/terrain.obj");
 	if (mesh != nullptr)
 	{
-		m_geometric_object1 = new GeometryNode();
-		m_geometric_object1->Init(mesh);
+		terrain = new GeometryNode();
+		terrain->Init(mesh);
 	}
 	else
 		initialized = false;
@@ -210,8 +216,9 @@ bool Renderer::InitGeometricMeshes()
 	mesh = nullptr;
 	mesh = loader.load("../Data/Terrain/road.obj");
 	if (mesh != nullptr) {
-		m_geometric_object2 = new GeometryNode();
-		m_geometric_object2->Init(mesh);
+		road = new GeometryNode();
+		road->Init(mesh);
+		road_transformation_matrix = glm::translate(road_transformation_matrix,glm::vec3(2,0,0));
 	}
 
 	// load geometric object 3
@@ -287,41 +294,41 @@ void Renderer::RenderGeometry()
 	glActiveTexture(GL_TEXTURE0);
 
 	// draw the first object
-	glBindVertexArray(m_geometric_object1->m_vao);
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(m_geometric_object1_transformation_matrix));
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(m_geometric_object1_transformation_normal_matrix));
-	for (int j = 0; j < m_geometric_object1->parts.size(); j++)
+	glBindVertexArray(terrain->m_vao);
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(terrain_transformation_matrix));
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(terrain_transformation_normal_matrix));
+	for (int j = 0; j < terrain->parts.size(); j++)
 	{
-		glm::vec3 diffuseColor = m_geometric_object1->parts[j].diffuseColor;
-		glm::vec3 specularColor = m_geometric_object1->parts[j].specularColor;
-		float shininess = m_geometric_object1->parts[j].shininess;
+		glm::vec3 diffuseColor = terrain->parts[j].diffuseColor;
+		glm::vec3 specularColor = terrain->parts[j].specularColor;
+		float shininess = terrain->parts[j].shininess;
 
 		glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 		glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
 		glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
-		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (m_geometric_object1->parts[j].textureID > 0) ? 1.0f : 0.0f);
-		glBindTexture(GL_TEXTURE_2D, m_geometric_object1->parts[j].textureID);
+		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (terrain->parts[j].textureID > 0) ? 1.0f : 0.0f);
+		glBindTexture(GL_TEXTURE_2D, terrain->parts[j].textureID);
 
-		glDrawArrays(GL_TRIANGLES, m_geometric_object1->parts[j].start_offset, m_geometric_object1->parts[j].count);
+		glDrawArrays(GL_TRIANGLES, terrain->parts[j].start_offset, terrain->parts[j].count);
 	}
 
 	// draw the second object
 	// ..
-	glBindVertexArray(m_geometric_object2->m_vao);
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(m_geometric_object2_transformation_matrix));
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(m_geometric_object2_transformation_normal_matrix));
-	for (int j = 0; j < m_geometric_object2->parts.size(); ++j) {
-		glm::vec3 diffuseColor = m_geometric_object2->parts[j].diffuseColor;
-		glm::vec3 specularColor = m_geometric_object2->parts[j].specularColor;
-		float shininess = m_geometric_object2->parts[j].shininess;
+	glBindVertexArray(road->m_vao);
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(road_transformation_matrix));
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(road_transformation_normal_matrix));
+	for (int j = 0; j < road->parts.size(); ++j) {
+		glm::vec3 diffuseColor = road->parts[j].diffuseColor;
+		glm::vec3 specularColor = road->parts[j].specularColor;
+		float shininess = road->parts[j].shininess;
 
 		glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 		glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
 		glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
-		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (m_geometric_object2->parts[j].textureID > 0) ? 1.0f : 0.0f);
-		glBindTexture(GL_TEXTURE_2D, m_geometric_object2->parts[j].textureID);
+		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (road->parts[j].textureID > 0) ? 1.0f : 0.0f);
+		glBindTexture(GL_TEXTURE_2D, road->parts[j].textureID);
 
-		glDrawArrays(GL_TRIANGLES, m_geometric_object2->parts[j].start_offset, m_geometric_object2->parts[j].count);
+		glDrawArrays(GL_TRIANGLES, road->parts[j].start_offset, road->parts[j].count);
 
 	}
 

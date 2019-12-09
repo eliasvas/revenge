@@ -40,15 +40,15 @@ protected:
 	SpotLightNode m_spotlight_node;
 
 	// Meshes
-	class GeometryNode*								m_geometric_object1;
-	glm::mat4										m_geometric_object1_transformation_matrix;
-	glm::mat4										m_geometric_object1_transformation_normal_matrix;
-	class GeometryNode*								m_geometric_object2;
-	glm::mat4										m_geometric_object2_transformation_matrix;
-	glm::mat4										m_geometric_object2_transformation_normal_matrix;
-	class GeometryNode*								m_geometric_object3;
-	glm::mat4										m_geometric_object3_transformation_matrix;
-	glm::mat4										m_geometric_object3_transformation_normal_matrix;
+	class GeometryNode*								terrain;
+	glm::mat4										terrain_transformation_matrix;
+	glm::mat4										terrain_transformation_normal_matrix;
+	class GeometryNode*								road;
+	glm::mat4										road_transformation_matrix;
+	glm::mat4										road_transformation_normal_matrix;
+	class GeometryNode*								green_plane;
+	glm::mat4										green_plane_transformation_matrix;
+	glm::mat4										green_plane_transformation_normal_matrix;
 
 	// Protected Functions
 	bool InitRenderingTechniques();
