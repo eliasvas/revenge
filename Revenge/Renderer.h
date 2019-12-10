@@ -49,6 +49,10 @@ protected:
 	class GeometryNode*								green_plane;
 	glm::mat4										green_plane_transformation_matrix;
 	glm::mat4										green_plane_transformation_normal_matrix;
+	class GeometryNode*								skeleton;
+	glm::mat4										skeleton_transformation_matrix;
+	glm::mat4										skeleton_transformation_normal_matrix;
+
 
 	// Protected Functions
 	bool InitRenderingTechniques();

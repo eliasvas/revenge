@@ -55,8 +55,8 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// open the viewport
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); //we set up our viewport
@@ -73,7 +73,6 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 		printf("Exiting with error at Renderer::Init\n");
 		return false;
 	}
-
 	//If everything initialized
 	return techniques_initialization && items_initialization && buffers_initialization;
 }
@@ -223,6 +222,25 @@ bool Renderer::InitGeometricMeshes()
 
 	// load geometric object 3
 	// ..
+	mesh = nullptr;
+	mesh = loader.load("../Data/Various/plane_green.obj");
+	if (mesh != nullptr) {
+		green_plane = new GeometryNode();
+		green_plane->Init(mesh);
+	}
+
+
+	mesh = nullptr;
+	mesh = loader.load("../Data/Pirates/skeleton.obj");
+	if (mesh != nullptr) {
+		skeleton = new GeometryNode();
+		skeleton->Init(mesh);
+	}
+	skeleton_transformation_matrix = glm::scale(skeleton_transformation_matrix, glm::vec3(0.05, 0.05, 0.05));
+	skeleton_transformation_matrix = glm::rotate(skeleton_transformation_matrix,3.1415f, glm::vec3(0,1,0));
+	skeleton_transformation_matrix = glm::translate(skeleton_transformation_matrix, glm::vec3(0,1,0));
+	
+
 	// Initialize Particle Emitters
 
 	return initialized;
@@ -295,6 +313,7 @@ void Renderer::RenderGeometry()
 
 	//Draw Tiles 
 	glm::mat4 transform = terrain_transformation_matrix;
+	//TODO should be done with glDrawArraysInstanced
 	for (int y = 0; y < 4; ++y) {
 		for (int x = 0; x < 4; ++x) {
 			
@@ -345,6 +364,58 @@ void Renderer::RenderGeometry()
 		transform = glm::translate(transform,glm::vec3(0, 0,2*(y+1)));//x += 2;
 	}
 	
+	glBindVertexArray(green_plane->m_vao);
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(green_plane_transformation_matrix));
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(green_plane_transformation_normal_matrix));
+	for (int j = 0; j < green_plane->parts.size(); j++)
+	{
+		glm::vec3 diffuseColor = green_plane->parts[j].diffuseColor;
+		glm::vec3 specularColor = green_plane->parts[j].specularColor;
+		float shininess = green_plane->parts[j].shininess;
+
+		glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+		glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+		glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
+		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (green_plane->parts[j].textureID > 0) ? 1.0f : 0.0f);
+		glBindTexture(GL_TEXTURE_2D, green_plane->parts[j].textureID);
+
+		glDrawArrays(GL_TRIANGLES, green_plane->parts[j].start_offset, green_plane->parts[j].count);
+	}
+
+	glBindVertexArray(skeleton->m_vao);
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(skeleton_transformation_matrix));
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(skeleton_transformation_normal_matrix));
+	for (int j = 0; j < skeleton->parts.size(); j++)
+	{
+		glm::vec3 diffuseColor = skeleton->parts[j].diffuseColor;
+		glm::vec3 specularColor = skeleton->parts[j].specularColor;
+		float shininess = skeleton->parts[j].shininess;
+
+		glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+		glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+		glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
+		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (skeleton->parts[j].textureID > 0) ? 1.0f : 0.0f);
+		glBindTexture(GL_TEXTURE_2D, skeleton->parts[j].textureID);
+
+		glDrawArrays(GL_TRIANGLES, skeleton->parts[j].start_offset, skeleton->parts[j].count);
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	// unbind the vao
 	glBindVertexArray(0);
 	// unbind the shader program

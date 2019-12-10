@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="GeometricMesh.h" />
     <ClInclude Include="GeometryNode.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="OBJLoader.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Renderer.h" />
