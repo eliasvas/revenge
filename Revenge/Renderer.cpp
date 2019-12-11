@@ -6,14 +6,16 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "OBJLoader.h"
+#include "GameObject.h"
 
-int tilemap[]={ 1, 1, 1, 0 ,
-				1, 0, 1, 1,
+int tilemap[]={ 1, 0, 0, 1 ,
 				1, 0, 0, 1,
-				1, 0, 0, 1
+				1, 0, 1, 1,
+				1, 1, 1, 0
 			   };
 int tilemap_width = 4;
 int tilemap_height = 4;
+GameObject* skeleton_no_anim = NULL;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -104,6 +106,7 @@ void Renderer::Update(float dt)
 
 	m_continous_time += dt;
 
+	skeleton_no_anim->Update(dt);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -240,7 +243,7 @@ bool Renderer::InitGeometricMeshes()
 	skeleton_transformation_matrix = glm::rotate(skeleton_transformation_matrix,3.1415f, glm::vec3(0,1,0));
 	skeleton_transformation_matrix = glm::translate(skeleton_transformation_matrix, glm::vec3(0,1,0));
 	
-
+	skeleton_no_anim = new GameObject(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix);
 	// Initialize Particle Emitters
 
 	return initialized;
@@ -382,25 +385,7 @@ void Renderer::RenderGeometry()
 		glDrawArrays(GL_TRIANGLES, green_plane->parts[j].start_offset, green_plane->parts[j].count);
 	}
 
-	glBindVertexArray(skeleton->m_vao);
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(skeleton_transformation_matrix));
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(skeleton_transformation_normal_matrix));
-	for (int j = 0; j < skeleton->parts.size(); j++)
-	{
-		glm::vec3 diffuseColor = skeleton->parts[j].diffuseColor;
-		glm::vec3 specularColor = skeleton->parts[j].specularColor;
-		float shininess = skeleton->parts[j].shininess;
-
-		glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
-		glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
-		glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
-		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (skeleton->parts[j].textureID > 0) ? 1.0f : 0.0f);
-		glBindTexture(GL_TEXTURE_2D, skeleton->parts[j].textureID);
-
-		glDrawArrays(GL_TRIANGLES, skeleton->parts[j].start_offset, skeleton->parts[j].count);
-	}
-
-
+	skeleton_no_anim->Render(m_geometry_rendering_program);
 
 
 
