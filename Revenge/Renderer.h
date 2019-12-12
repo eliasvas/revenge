@@ -94,6 +94,7 @@ public:
 	void										SkeletonMoveBackWard(bool enable);
 	void										SkeletonMoveLeft(bool enable);
 	void										SkeletonMoveRight(bool enable);
+	void										move_green_plane(glm::vec3 mov);
 };
 
 #endif

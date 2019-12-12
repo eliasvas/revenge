@@ -8,13 +8,19 @@
 #include "OBJLoader.h"
 #include "GameObject.h"
 
-int tilemap[]={ 1, 0, 0, 1 ,
-				1, 0, 0, 1,
-				1, 0, 1, 1,
-				1, 1, 1, 0
+int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
+				1, 0, 0, 0 ,0, 0, 1, 1, 1, 1,
+				1, 0, 0, 0 ,0, 0, 0, 0, 0, 1,
+				1, 1, 0, 0 ,0, 0, 0, 1, 1, 1,
+				0, 1, 0, 0 ,0, 0, 0, 1, 0, 0,
+				0, 1, 0, 0 ,0, 0, 0, 1, 0, 0,
+				0, 1, 0, 0 ,0, 0, 1, 1, 0, 0,
+				0, 1, 1, 1 ,0, 0, 1, 0, 0, 0,
+				0, 0, 0, 1 ,1, 1, 1, 0, 0, 0,
+				0, 0, 0, 0 ,0, 0, 0, 0, 0, 0
 			   };
-int tilemap_width = 4;
-int tilemap_height = 4;
+int tilemap_width = 10;
+int tilemap_height = 10;
 GameObject* skeleton_no_anim = NULL;
 // RENDERER
 Renderer::Renderer()
@@ -231,7 +237,7 @@ bool Renderer::InitGeometricMeshes()
 		green_plane = new GeometryNode();
 		green_plane->Init(mesh);
 	}
-
+	//green_plane_transformation_matrix = glm::translate(green_plane_transformation_matrix, glm::vec3(0,1,0));
 
 	mesh = nullptr;
 	mesh = loader.load("../Data/Pirates/skeleton.obj");
@@ -241,7 +247,7 @@ bool Renderer::InitGeometricMeshes()
 	}
 	skeleton_transformation_matrix = glm::scale(skeleton_transformation_matrix, glm::vec3(0.05, 0.05, 0.05));
 	skeleton_transformation_matrix = glm::rotate(skeleton_transformation_matrix,3.1415f, glm::vec3(0,1,0));
-	skeleton_transformation_matrix = glm::translate(skeleton_transformation_matrix, glm::vec3(0,1,0));
+	skeleton_transformation_matrix = glm::translate(skeleton_transformation_matrix, glm::vec3(0,4,0));
 	
 	skeleton_no_anim = new GameObject(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix);
 	// Initialize Particle Emitters
@@ -317,11 +323,11 @@ void Renderer::RenderGeometry()
 	//Draw Tiles 
 	glm::mat4 transform = terrain_transformation_matrix;
 	//TODO should be done with glDrawArraysInstanced
-	for (int y = 0; y < 4; ++y) {
-		for (int x = 0; x < 4; ++x) {
+	for (int y = 0; y < tilemap_height; ++y) {
+		for (int x = 0; x < tilemap_width; ++x) {
 			
 			//std::cout << glm::to_string(transform) << std::endl;
-			if (tilemap[x + y*4] == 0) {
+			if (tilemap[x + y*tilemap_height] == 0) {
 				//draw terrain
 				glBindVertexArray(terrain->m_vao);
 				glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transform));
@@ -342,7 +348,7 @@ void Renderer::RenderGeometry()
 				}
 
 			}
-			else if (tilemap[x + y * 4] == 1) {
+			else if (tilemap[x + y * tilemap_height] == 1) {
 				glBindVertexArray(road->m_vao);
 				glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transform));
 				glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(road_transformation_normal_matrix));
@@ -457,4 +463,9 @@ void Renderer::SkeletonMoveLeft(bool enable)
 void Renderer::SkeletonMoveRight(bool enable)
 {
 	m_skeleton_movement.y = (enable) ? 1.f : 0.f;
+}
+void Renderer::move_green_plane(glm::vec3 mov) {
+	if (green_plane_transformation_matrix[3][0] + mov[0] >= 0 && green_plane_transformation_matrix[3][0] + mov[0] < tilemap_width * 2
+		&& green_plane_transformation_matrix[3][2] + mov[2] >= 0 && green_plane_transformation_matrix[3][2] + mov[2] <tilemap_height * 2)
+	green_plane_transformation_matrix= glm::translate(green_plane_transformation_matrix, mov);
 }

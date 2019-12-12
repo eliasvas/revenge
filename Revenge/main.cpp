@@ -184,23 +184,7 @@ int main(int argc, char *argv[])
 				{
 					renderer->CameraMoveRight(true);
 				}
-				else if (event.key.keysym.sym == SDLK_UP)
-				{
-					renderer->SkeletonMoveForward(true);
-				}
-				else if (event.key.keysym.sym == SDLK_DOWN)
-				{
-					renderer->SkeletonMoveBackWard(true);
-				}
-				else if (event.key.keysym.sym == SDLK_LEFT)
-				{
-					renderer->SkeletonMoveLeft(true);
-				}
-				else if (event.key.keysym.sym == SDLK_RIGHT)
-				{
-					renderer->SkeletonMoveRight(true);
-				}
-
+			
 			}
 			else if (event.type == SDL_KEYUP)
 			{
@@ -220,25 +204,22 @@ int main(int argc, char *argv[])
 				{
 					renderer->CameraMoveRight(false);
 				}
-				if (event.key.keysym.sym == SDLK_UP)
-				{
-					renderer->SkeletonMoveForward(false);
-				}
-				else if (event.key.keysym.sym == SDLK_DOWN)
-				{
-					renderer->SkeletonMoveBackWard(false);
-				}
-				else if (event.key.keysym.sym == SDLK_LEFT)
-				{
-					renderer->SkeletonMoveLeft(false);
-				}
-				else if (event.key.keysym.sym == SDLK_RIGHT)
-				{
-					renderer->SkeletonMoveRight(false);
-				}
 				else if(event.key.keysym.sym == SDLK_TAB) {
 					show_options = !show_options;
 				}
+				else if (event.key.keysym.sym == SDLK_DOWN) {
+					renderer->move_green_plane(glm::vec3(0,0,-2));
+				}
+				else if (event.key.keysym.sym == SDLK_LEFT) {
+					renderer->move_green_plane(glm::vec3(2,0,0));
+				}
+				else if (event.key.keysym.sym == SDLK_UP) {
+					renderer->move_green_plane(glm::vec3(0,0,2));
+				}
+				else if (event.key.keysym.sym == SDLK_RIGHT) {
+					renderer->move_green_plane(glm::vec3(-2,0,0));
+				}
+
 			}
 			else if (event.type == SDL_MOUSEMOTION)
 			{
