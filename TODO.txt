@@ -1,5 +1,4 @@
 -implement sphere collisions
 -make a linked list implementation of the movement of the horde
 -make the animation and path of the skeleton-pirates
--fix imgui navigation issues
 -make towers spawn only in terrain blocks

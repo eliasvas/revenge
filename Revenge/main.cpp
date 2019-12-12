@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 				}
 
 			}
-			else if (event.type == SDL_MOUSEMOTION)
+			else if (event.type == SDL_MOUSEMOTION&& show_options == false)
 			{
 				int x = event.motion.x;
 				int y = event.motion.y;
