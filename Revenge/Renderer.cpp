@@ -89,6 +89,7 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 
 void Renderer::Update(float dt)
 {
+	std::cout << towers.size()<<std::endl;
 	float movement_speed = 2.0f;
 	glm::vec3 direction = glm::normalize(m_camera_target_position - m_camera_position);
 
@@ -340,7 +341,7 @@ void Renderer::RenderGeometry()
 		for (int x = 0; x < tilemap_width; ++x) {
 			
 			//std::cout << glm::to_string(transform) << std::endl;
-			if (tilemap[x + y*tilemap_height] == 0) {
+			if (tilemap[x + y*tilemap_height] == 0 || tilemap[x+y*tilemap_height] == 2) { //todo fix
 				//draw terrain
 				glBindVertexArray(terrain->m_vao);
 				glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transform));
@@ -470,5 +471,9 @@ void Renderer::move_green_plane(glm::vec3 mov) {
 
 
 void Renderer::BuildTower() {
+	int x = (int)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
+	int y = (int)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
+	if (tilemap[x + y * tilemap_width]!=0)return;
+	tilemap[x + y * tilemap_width] = 2; //since we are going to make a new tower we are going to prevent further building on the same block
 	towers.push_back(new GameObject(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,"tower"));
 }
