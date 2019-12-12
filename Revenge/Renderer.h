@@ -39,6 +39,9 @@ protected:
 	SpotLightNode m_spotlight_node;
 
 	// Meshes
+	class GeometryNode*								tower;
+	glm::mat4										tower_transformation_matrix;
+	glm::mat4										tower_transformation_normal_matrix;
 	class GeometryNode*								terrain;
 	glm::mat4										terrain_transformation_matrix;
 	glm::mat4										terrain_transformation_normal_matrix;
@@ -93,7 +96,9 @@ public:
 	void										SkeletonMoveBackWard(bool enable);
 	void										SkeletonMoveLeft(bool enable);
 	void										SkeletonMoveRight(bool enable);
+
 	void										move_green_plane(glm::vec3 mov);
+	void BuildTower();
 };
 
 #endif

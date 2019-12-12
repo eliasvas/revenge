@@ -54,3 +54,5 @@ struct Pirate : public GameObject {
 		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -3)*dt*(float)speed);
 	}
 };
+
+

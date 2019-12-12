@@ -219,6 +219,10 @@ int main(int argc, char *argv[])
 				else if (event.key.keysym.sym == SDLK_RIGHT) {
 					renderer->move_green_plane(glm::vec3(-2,0,0));
 				}
+				else if (event.key.keysym.sym == SDLK_b)
+				{
+					renderer->BuildTower();
+				}
 
 			}
 			else if (event.type == SDL_MOUSEMOTION)
@@ -262,7 +266,7 @@ int main(int argc, char *argv[])
 				ImGui::Checkbox("anti-aliasing", &antialiasing);
 				ImGui::Checkbox("fullscreen", &fullscreen);
 				ImGui::SliderInt("volume", &music_volume, 0.0f, MIX_MAX_VOLUME);
-				ImGui::SliderInt("speed", &renderer->speed, 0.0f, 8.0f);
+				ImGui::SliderInt("speed", &renderer->speed, 0.0f, 32.0f);
 				ImGui::End();
 			}
 			ImGui::Render();

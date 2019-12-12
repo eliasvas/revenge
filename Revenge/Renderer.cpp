@@ -23,6 +23,7 @@ int tilemap_width = 10;
 int tilemap_height = 10;
 GameObject* skeleton_no_anim = NULL;
 GameObject* tile = NULL;
+std::vector<GameObject*> towers;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -115,6 +116,7 @@ void Renderer::Update(float dt)
 
 	skeleton_no_anim->Update(dt, speed);
 	tile->Update(dt);
+	for (GameObject* t : towers)t->Update(dt);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -251,6 +253,14 @@ bool Renderer::InitGeometricMeshes()
 	skeleton_transformation_matrix = glm::rotate(skeleton_transformation_matrix,3.1415f, glm::vec3(0,1,0));
 	skeleton_transformation_matrix = glm::translate(skeleton_transformation_matrix, glm::vec3(0,4,0));
 	
+	
+	mesh = nullptr;
+	mesh = loader.load("../Data/MedievalTower/tower.obj");
+	if (mesh != nullptr) {
+		tower = new GeometryNode();
+		tower->Init(mesh);
+	}
+
 	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,"skeleton");
 	tile = new GameObject(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, "tile");
 	// Initialize Particle Emitters
@@ -380,7 +390,7 @@ void Renderer::RenderGeometry()
 
 	skeleton_no_anim->Render(m_geometry_rendering_program);
 	tile->Render(m_geometry_rendering_program);
-
+	for (GameObject* t : towers)t->Render(m_geometry_rendering_program);
 
 
 
@@ -456,4 +466,9 @@ void Renderer::move_green_plane(glm::vec3 mov) {
 	if (tile->transformation_matrix[3][0] + mov[0] >= 0 && tile->transformation_matrix[3][0] + mov[0] < tilemap_width * 2
 		&& tile->transformation_matrix[3][2] + mov[2] >= 0 && tile->transformation_matrix[3][2] + mov[2] <tilemap_height * 2)
 	tile->transformation_matrix= glm::translate(tile->transformation_matrix, mov);
+}
+
+
+void Renderer::BuildTower() {
+	towers.push_back(new GameObject(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.4,0.4,0.4)), tile->transformation_normal_matrix,"tower"));
 }
