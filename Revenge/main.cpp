@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
 				ImGui::Checkbox("anti-aliasing", &antialiasing);
 				ImGui::Checkbox("fullscreen", &fullscreen);
 				ImGui::SliderInt("volume", &music_volume, 0.0f, MIX_MAX_VOLUME);
-				ImGui::SliderInt("speed", &renderer->speed, 0.0f, 32.0f);
+				ImGui::SliderInt("speed", &renderer->speed, -32.0f, 32.0f);
 				ImGui::End();
 			}
 			ImGui::Render();

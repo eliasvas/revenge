@@ -1,4 +1,4 @@
 -implement sphere collisions
 -make a linked list implementation of the movement of the horde
 -make the animation and path of the skeleton-pirates
--make towers spawn only in terrain blocks
+-be able to remove towers

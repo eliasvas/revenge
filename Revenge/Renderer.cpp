@@ -89,7 +89,6 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 
 void Renderer::Update(float dt)
 {
-	std::cout << towers.size()<<std::endl;
 	float movement_speed = 2.0f;
 	glm::vec3 direction = glm::normalize(m_camera_target_position - m_camera_position);
 
