@@ -113,7 +113,7 @@ void Renderer::Update(float dt)
 
 	m_continous_time += dt;
 
-	skeleton_no_anim->Update(dt);
+	skeleton_no_anim->Update(dt, speed);
 	tile->Update(dt);
 	// update meshes tranformations
 	

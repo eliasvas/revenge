@@ -16,7 +16,7 @@ struct GameObject {
 	std::string tag;
 	GameObject(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal,std::string tag);
 	virtual void Render(ShaderProgram& shader);
-	virtual void Update(float dt);
+	virtual void Update(float dt, int speed = 1.0f);
 };
 GameObject::GameObject(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, std::string tag = "") {
 	this->geometry = geometry;
@@ -25,7 +25,7 @@ GameObject::GameObject(GeometryNode* geometry, glm::mat4 transform, glm::mat4 no
 	transformation_normal_matrix = normal;
 
 }
-void GameObject::Update(float dt) {
+void GameObject::Update(float dt, int speed) {
 }
 void GameObject::Render(ShaderProgram& shader) {
 	glBindVertexArray(geometry->m_vao);
@@ -50,7 +50,7 @@ void GameObject::Render(ShaderProgram& shader) {
 
 struct Pirate : public GameObject {
 	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, std::string tag): GameObject(geometry,transform, normal,tag) {}
-	void Update(float dt) {
-		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -3)*dt);
+	void Update(float dt,int speed = 1) {
+		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -3)*dt*(float)speed);
 	}
 };

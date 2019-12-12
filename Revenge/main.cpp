@@ -19,6 +19,7 @@ int music_volume = 5;
 SDL_GLContext gContext;
 const int SCREEN_WIDTH = 1380;	//800;	//640;
 const int SCREEN_HEIGHT = 1024;	//600;	//480;
+//int speed = 1;
 
 //Event handler
 SDL_Event event;
@@ -126,7 +127,6 @@ int main(int argc, char *argv[])
 {
 	bool fullscreen = false;
 	bool antialiasing = false;
-	int speed = 1;
 	bool show_options = false;
 	//Initialize
 	if (init() == false)
@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 				ImGui::Checkbox("anti-aliasing", &antialiasing);
 				ImGui::Checkbox("fullscreen", &fullscreen);
 				ImGui::SliderInt("volume", &music_volume, 0.0f, MIX_MAX_VOLUME);
-				ImGui::SliderInt("speed", &speed, 0.0f, 8.0f);
+				ImGui::SliderInt("speed", &renderer->speed, 0.0f, 8.0f);
 				ImGui::End();
 			}
 			ImGui::Render();

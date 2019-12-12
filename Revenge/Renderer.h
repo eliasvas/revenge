@@ -17,7 +17,7 @@ public:
 		LINES,
 		POINTS
 	};
-
+	int speed = 1;
 protected:
 	int												m_screen_width, m_screen_height;
 	glm::mat4										m_view_matrix;
@@ -27,7 +27,6 @@ protected:
 	glm::vec3										m_camera_up_vector;
 	glm::vec2										m_camera_movement;
 	glm::vec2										m_camera_look_angle_destination;
-
 	// skeleton movement direction
 	glm::vec2										m_skeleton_movement;
 	
