@@ -223,6 +223,10 @@ int main(int argc, char *argv[])
 				{
 					renderer->BuildTower();
 				}
+				else if (event.key.keysym.sym == SDLK_v)
+				{
+					renderer->RemoveTower();
+				}
 
 			}
 			else if (event.type == SDL_MOUSEMOTION&& show_options == false)

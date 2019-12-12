@@ -1,4 +1,3 @@
 -implement sphere collisions
 -make a linked list implementation of the movement of the horde
 -make the animation and path of the skeleton-pirates
--be able to remove towers

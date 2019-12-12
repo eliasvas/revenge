@@ -19,6 +19,7 @@ int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				0, 0, 0, 1 ,1, 1, 1, 0, 0, 0,
 				0, 0, 0, 0 ,0, 0, 0, 0, 0, 0
 			   };
+std::vector <glm::vec3> path;
 int tilemap_width = 10;
 int tilemap_height = 10;
 GameObject* skeleton_no_anim = NULL;
@@ -89,6 +90,7 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 
 void Renderer::Update(float dt)
 {
+	std::cout << towers.size() << std::endl;
 	float movement_speed = 2.0f;
 	glm::vec3 direction = glm::normalize(m_camera_target_position - m_camera_position);
 
@@ -468,6 +470,20 @@ void Renderer::move_green_plane(glm::vec3 mov) {
 	tile->transformation_matrix= glm::translate(tile->transformation_matrix, mov);
 }
 
+void Renderer::RemoveTower() {
+	int x = (int)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
+	int y = (int)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
+	if (tilemap[x + y * tilemap_width]!=2)return;
+	tilemap[x + y * tilemap_width] = 0; //since we are going to make a new tower we are going to prevent further building on the same block
+	for (std::vector<GameObject*>::const_iterator t = towers.cbegin(); t < towers.cend(); ++t) {
+		if ((int)((*t)->transformation_matrix[3][0]) == (int)(tile->transformation_matrix[3][0])
+			&& (int)((*t)->transformation_matrix[3][2]) == (int)(tile->transformation_matrix[3][2])) { //todo check
+			std::cout << "erase" << std::endl;
+			towers.erase(t);
+			break;
+		}
+	}
+}
 
 void Renderer::BuildTower() {
 	int x = (int)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
@@ -476,3 +492,15 @@ void Renderer::BuildTower() {
 	tilemap[x + y * tilemap_width] = 2; //since we are going to make a new tower we are going to prevent further building on the same block
 	towers.push_back(new GameObject(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,"tower"));
 }
+void FindPath(std::vector<glm::vec3>& path_arr, int* arr, int width, int height) {
+	for (int y = 0; y < tilemap_height; ++y) {
+		for (int x = 0; x < tilemap_width; ++x) {
+			//do something
+		}
+	}
+}
+
+
+
+
+
