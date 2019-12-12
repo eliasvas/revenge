@@ -1,4 +1,5 @@
 #include <vector>
+#include <string>
 #include "ShaderProgram.h"
 #include "SpotlightNode.h"
 #include "ParticleSystem.h"
@@ -12,18 +13,19 @@ struct GameObject {
 	ShaderProgram*								m_geometry_rendering_program;
 	glm::mat4									transformation_matrix;
 	glm::mat4									transformation_normal_matrix;
-	GameObject(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal);
-	void Render(ShaderProgram& shader);
-	void Update(float dt);
+	std::string tag;
+	GameObject(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal,std::string tag);
+	virtual void Render(ShaderProgram& shader);
+	virtual void Update(float dt);
 };
-GameObject::GameObject(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal) {
+GameObject::GameObject(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, std::string tag = "") {
 	this->geometry = geometry;
+	this->tag = tag;
 	transformation_matrix = transform;
 	transformation_normal_matrix = normal;
 
 }
 void GameObject::Update(float dt) {
-	transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -3)*dt);
 }
 void GameObject::Render(ShaderProgram& shader) {
 	glBindVertexArray(geometry->m_vao);
@@ -45,3 +47,10 @@ void GameObject::Render(ShaderProgram& shader) {
 	}
 
 }
+
+struct Pirate : public GameObject {
+	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, std::string tag): GameObject(geometry,transform, normal,tag) {}
+	void Update(float dt) {
+		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -3)*dt);
+	}
+};

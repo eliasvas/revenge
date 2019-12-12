@@ -22,6 +22,7 @@ int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 int tilemap_width = 10;
 int tilemap_height = 10;
 GameObject* skeleton_no_anim = NULL;
+GameObject* tile = NULL;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -113,6 +114,7 @@ void Renderer::Update(float dt)
 	m_continous_time += dt;
 
 	skeleton_no_anim->Update(dt);
+	tile->Update(dt);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -197,7 +199,7 @@ bool Renderer::InitLightSources()
 	m_spotlight_node.SetPosition(glm::vec3(12, 18, -3));
 	m_spotlight_node.SetTarget(glm::vec3(0, 2, 0));
 
-	m_spotlight_node.SetColor(40.0f * glm::vec3(255, 255, 251) / 255.f);
+	m_spotlight_node.SetColor(80.0f * glm::vec3(255, 255, 251) / 255.f);
 	m_spotlight_node.SetConeSize(500, 700);
 	m_spotlight_node.CastShadow(true);
 
@@ -249,7 +251,8 @@ bool Renderer::InitGeometricMeshes()
 	skeleton_transformation_matrix = glm::rotate(skeleton_transformation_matrix,3.1415f, glm::vec3(0,1,0));
 	skeleton_transformation_matrix = glm::translate(skeleton_transformation_matrix, glm::vec3(0,4,0));
 	
-	skeleton_no_anim = new GameObject(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix);
+	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,"skeleton");
+	tile = new GameObject(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, "tile");
 	// Initialize Particle Emitters
 
 	return initialized;
@@ -372,27 +375,11 @@ void Renderer::RenderGeometry()
 		transform = terrain_transformation_matrix;
 		transform = glm::translate(transform,glm::vec3(0, 0,2*(y+1)));//x += 2;
 	}
-	
-	glBindVertexArray(green_plane->m_vao);
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(green_plane_transformation_matrix));
-	glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(green_plane_transformation_normal_matrix));
-	for (int j = 0; j < green_plane->parts.size(); j++)
-	{
-		glm::vec3 diffuseColor = green_plane->parts[j].diffuseColor;
-		glm::vec3 specularColor = green_plane->parts[j].specularColor;
-		float shininess = green_plane->parts[j].shininess;
 
-		glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
-		glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
-		glUniform1f(m_geometry_rendering_program["uniform_shininess"], shininess);
-		glUniform1f(m_geometry_rendering_program["uniform_has_texture"], (green_plane->parts[j].textureID > 0) ? 1.0f : 0.0f);
-		glBindTexture(GL_TEXTURE_2D, green_plane->parts[j].textureID);
 
-		glDrawArrays(GL_TRIANGLES, green_plane->parts[j].start_offset, green_plane->parts[j].count);
-	}
 
 	skeleton_no_anim->Render(m_geometry_rendering_program);
-
+	tile->Render(m_geometry_rendering_program);
 
 
 
@@ -465,7 +452,8 @@ void Renderer::SkeletonMoveRight(bool enable)
 	m_skeleton_movement.y = (enable) ? 1.f : 0.f;
 }
 void Renderer::move_green_plane(glm::vec3 mov) {
-	if (green_plane_transformation_matrix[3][0] + mov[0] >= 0 && green_plane_transformation_matrix[3][0] + mov[0] < tilemap_width * 2
-		&& green_plane_transformation_matrix[3][2] + mov[2] >= 0 && green_plane_transformation_matrix[3][2] + mov[2] <tilemap_height * 2)
-	green_plane_transformation_matrix= glm::translate(green_plane_transformation_matrix, mov);
+	if (tile == NULL)return;
+	if (tile->transformation_matrix[3][0] + mov[0] >= 0 && tile->transformation_matrix[3][0] + mov[0] < tilemap_width * 2
+		&& tile->transformation_matrix[3][2] + mov[2] >= 0 && tile->transformation_matrix[3][2] + mov[2] <tilemap_height * 2)
+	tile->transformation_matrix= glm::translate(tile->transformation_matrix, mov);
 }
