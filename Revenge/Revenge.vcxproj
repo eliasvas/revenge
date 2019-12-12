@@ -150,6 +150,7 @@
     <ClCompile Include="Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CircleCollider.h" />
     <ClInclude Include="GeometricMesh.h" />
     <ClInclude Include="GeometryNode.h" />
     <ClInclude Include="GameObject.h" />

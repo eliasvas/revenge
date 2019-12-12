@@ -470,5 +470,5 @@ void Renderer::move_green_plane(glm::vec3 mov) {
 
 
 void Renderer::BuildTower() {
-	towers.push_back(new GameObject(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.4,0.4,0.4)), tile->transformation_normal_matrix,"tower"));
+	towers.push_back(new GameObject(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,"tower"));
 }
