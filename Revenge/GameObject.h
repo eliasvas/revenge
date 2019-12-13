@@ -14,6 +14,7 @@ struct GameObject {
 	glm::mat4									transformation_matrix;
 	glm::mat4									transformation_normal_matrix;
 	std::string tag;
+	bool active = true;
 	GameObject(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal,std::string tag);
 	virtual void Render(ShaderProgram& shader);
 	virtual void Update(float dt, int speed = 1.0f);

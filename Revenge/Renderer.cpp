@@ -7,6 +7,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "OBJLoader.h"
 #include "GameObject.h"
+#include "CircleCollider.h"
 
 int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				1, 0, 0, 0 ,0, 0, 1, 1, 1, 1,
@@ -20,6 +21,7 @@ int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				0, 0, 0, 0 ,0, 0, 0, 0, 0, 0
 			   };
 std::vector <glm::vec3> path;
+std::vector <CircleCollider*> colliders;
 int tilemap_width = 10;
 int tilemap_height = 10;
 GameObject* skeleton_no_anim = NULL;
@@ -90,7 +92,6 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 
 void Renderer::Update(float dt)
 {
-	std::cout << towers.size() << std::endl;
 	float movement_speed = 2.0f;
 	glm::vec3 direction = glm::normalize(m_camera_target_position - m_camera_position);
 
@@ -119,6 +120,15 @@ void Renderer::Update(float dt)
 	skeleton_no_anim->Update(dt, speed);
 	tile->Update(dt);
 	for (GameObject* t : towers)t->Update(dt);
+	for (CircleCollider* c : colliders)c->Update(dt);
+	for (CircleCollider* c1 : colliders) {
+		for (CircleCollider* c2 : colliders) {
+			if (c1 != c2 && CheckCollision(c1, c2)) {
+				printf("collision!!\n");
+			}
+			else { printf("no collision!!\n"); }
+		}
+	}
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -255,7 +265,6 @@ bool Renderer::InitGeometricMeshes()
 	skeleton_transformation_matrix = glm::rotate(skeleton_transformation_matrix,3.1415f, glm::vec3(0,1,0));
 	skeleton_transformation_matrix = glm::translate(skeleton_transformation_matrix, glm::vec3(0,4,0));
 	
-	
 	mesh = nullptr;
 	mesh = loader.load("../Data/MedievalTower/tower.obj");
 	if (mesh != nullptr) {
@@ -265,7 +274,8 @@ bool Renderer::InitGeometricMeshes()
 
 	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,"skeleton");
 	tile = new GameObject(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, "tile");
-	// Initialize Particle Emitters
+	colliders.push_back(new CircleCollider(1.0f, skeleton_no_anim, glm::vec3(0,0,0)));
+	colliders.push_back(new CircleCollider(1.0f, tile, glm::vec3(0,0,0)));
 
 	return initialized;
 }
@@ -478,7 +488,6 @@ void Renderer::RemoveTower() {
 	for (std::vector<GameObject*>::const_iterator t = towers.cbegin(); t < towers.cend(); ++t) {
 		if ((int)((*t)->transformation_matrix[3][0]) == (int)(tile->transformation_matrix[3][0])
 			&& (int)((*t)->transformation_matrix[3][2]) == (int)(tile->transformation_matrix[3][2])) { //todo check
-			std::cout << "erase" << std::endl;
 			towers.erase(t);
 			break;
 		}
