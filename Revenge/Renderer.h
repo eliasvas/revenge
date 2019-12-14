@@ -39,6 +39,9 @@ protected:
 	SpotLightNode m_spotlight_node;
 
 	// Meshes
+	class GeometryNode*								ball;
+	glm::mat4										ball_transformation_matrix;
+	glm::mat4										ball_transformation_normal_matrix;
 	class GeometryNode*								tower;
 	glm::mat4										tower_transformation_matrix;
 	glm::mat4										tower_transformation_normal_matrix;

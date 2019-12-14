@@ -138,6 +138,7 @@
     <ClCompile Include="..\3rdparty\inc\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\3rdparty\inc\imgui\imgui_impl_sdl.cpp" />
     <ClCompile Include="..\3rdparty\inc\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GeometricMesh.cpp" />
     <ClCompile Include="GeometryNode.cpp" />
     <ClCompile Include="main.cpp" />

@@ -21,11 +21,11 @@ int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				0, 0, 0, 0 ,0, 0, 0, 0, 0, 0
 			   };
 std::vector <glm::vec3> path;
-std::vector <CircleCollider*> colliders;
 int tilemap_width = 10;
 int tilemap_height = 10;
 GameObject* skeleton_no_anim = NULL;
 GameObject* tile = NULL;
+GameObject* cannonball = NULL;
 std::vector<GameObject*> towers;
 // RENDERER
 Renderer::Renderer()
@@ -86,6 +86,8 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 		printf("Exiting with error at Renderer::Init\n");
 		return false;
 	}
+
+
 	//If everything initialized
 	return techniques_initialization && items_initialization && buffers_initialization;
 }
@@ -119,16 +121,8 @@ void Renderer::Update(float dt)
 
 	skeleton_no_anim->Update(dt, speed);
 	tile->Update(dt);
+	cannonball->Update(dt);
 	for (GameObject* t : towers)t->Update(dt);
-	for (CircleCollider* c : colliders)c->Update(dt);
-	for (CircleCollider* c1 : colliders) {
-		for (CircleCollider* c2 : colliders) {
-			if (c1 != c2 && CheckCollision(c1, c2)) {
-				printf("collision!!\n");
-			}
-			else { printf("no collision!!\n"); }
-		}
-	}
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -271,11 +265,19 @@ bool Renderer::InitGeometricMeshes()
 		tower = new GeometryNode();
 		tower->Init(mesh);
 	}
+	
+	mesh = nullptr;
+	mesh = loader.load("../Data/Various/cannonball.obj");
+	if (mesh != nullptr) {
+		ball = new GeometryNode();
+		ball->Init(mesh);
+	}
+	ball_transformation_matrix = glm::scale(ball_transformation_matrix, glm::vec3(0.1f));
+	ball_transformation_matrix = glm::translate(ball_transformation_matrix, glm::vec3(-9,4,0));
 
-	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,"skeleton");
-	tile = new GameObject(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, "tile");
-	colliders.push_back(new CircleCollider(1.0f, skeleton_no_anim, glm::vec3(0,0,0)));
-	colliders.push_back(new CircleCollider(1.0f, tile, glm::vec3(0,0,0)));
+	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(1,0,0)), "pirate");
+	tile = new GameObject(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
+	cannonball = new CannonBall(ball, ball_transformation_matrix, ball_transformation_normal_matrix, glm::vec3(1,0,0), new CircleCollider(1.0f,glm::vec3(0,0,0)), "cannonball");
 
 	return initialized;
 }
@@ -402,6 +404,7 @@ void Renderer::RenderGeometry()
 
 	skeleton_no_anim->Render(m_geometry_rendering_program);
 	tile->Render(m_geometry_rendering_program);
+	cannonball->Render(m_geometry_rendering_program);
 	for (GameObject* t : towers)t->Render(m_geometry_rendering_program);
 
 
@@ -499,7 +502,7 @@ void Renderer::BuildTower() {
 	int y = (int)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
 	if (tilemap[x + y * tilemap_width]!=0)return;
 	tilemap[x + y * tilemap_width] = 2; //since we are going to make a new tower we are going to prevent further building on the same block
-	towers.push_back(new GameObject(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,"tower"));
+	towers.push_back(new GameObject(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(2, glm::vec3(0,0,0)),"tower"));
 }
 void FindPath(std::vector<glm::vec3>& path_arr, int* arr, int width, int height) {
 	for (int y = 0; y < tilemap_height; ++y) {
