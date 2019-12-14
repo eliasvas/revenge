@@ -273,9 +273,9 @@ bool Renderer::InitGeometricMeshes()
 		ball->Init(mesh);
 	}
 	ball_transformation_matrix = glm::scale(ball_transformation_matrix, glm::vec3(0.1f));
-	ball_transformation_matrix = glm::translate(ball_transformation_matrix, glm::vec3(-9,4,0));
+	ball_transformation_matrix = glm::translate(ball_transformation_matrix, glm::vec3(0,1,0));
 
-	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(1,0,0)), "pirate");
+	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate");
 	tile = new GameObject(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
 	cannonball = new CannonBall(ball, ball_transformation_matrix, ball_transformation_normal_matrix, glm::vec3(1,0,0), new CircleCollider(1.0f,glm::vec3(0,0,0)), "cannonball");
 

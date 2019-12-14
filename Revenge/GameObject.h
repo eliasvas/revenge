@@ -10,6 +10,8 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "CircleCollider.h"
 #include <vector>
+
+
 struct GameObject {
 	static std::vector<GameObject*> objects;
 	CircleCollider* col;
@@ -50,13 +52,14 @@ struct GameObject {
 	}
 	virtual void Update(float dt, int speed = 1.0f) {};
 };
+bool CheckCollision(GameObject* g1, GameObject* g2);
 struct Pirate : public GameObject {
 	static std::vector<Pirate*> pirates;
 	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag): GameObject(geometry,transform, normal,col,tag) {
 		pirates.push_back(this);
 	}
 	void Update(float dt,int speed = 1) {
-		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -3)*dt*(float)speed);
+		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -0)*dt*(float)speed);
 	}
 };
 
@@ -71,13 +74,8 @@ struct CannonBall : public GameObject {
 		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(float)speed);
 		for (Pirate* p : Pirate::pirates) {
 			if (p == NULL)continue;
-			//if (collision(p, this)) {
-				//p->hit();
-				//printf("bullet collides with pirate!\n");
-			//}
+			if (CheckCollision(this, (GameObject*)p))printf("collision!\n");
+			else printf("no collision\n");
 		}
 	}
 };
-
-
-
