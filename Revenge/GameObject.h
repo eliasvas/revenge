@@ -50,7 +50,7 @@ struct GameObject {
 
 	}
 	virtual void Update(float dt, int speed = 1.0f) {};
-	virtual ~GameObject() {
+	~GameObject() {
 	}
 };
 bool CheckCollision(GameObject* g1, GameObject* g2);
@@ -84,11 +84,16 @@ struct CannonBall : public GameObject {
 
 		for (Pirate* p : Pirate::pirates) {
 			if (p == NULL)continue;
-			if (CheckCollision(this, (GameObject*)p))printf("collision!\n");
-			else printf("no collision\n");
+			//if (CheckCollision(this, (GameObject*)p))printf("collision!\n");
+			//else printf("no collision\n");
 		}
 		if (life < 0.0f) {
-			//delete this;
+			for (int i = 0; i < balls.size(); ++i) {
+				if (balls[i] == this) {
+					delete balls[i];
+					balls[i] = NULL;
+				}
+			}
 		}
 	}
 	~CannonBall() {
@@ -108,7 +113,7 @@ struct Tower : public GameObject {
 	}
 	void Update(float dt, int speed = 1) {
 		rate -= dt;
-		std::cout << towers.size()<< std::endl;
+		//std::cout << towers.size()<< std::endl;
 		for (Pirate* p : Pirate::pirates) {
 				if (p == NULL)continue;
 				if (CheckCollision(this, (GameObject*)p) && rate < 0) { //HUGE bottleneck
@@ -121,6 +126,5 @@ struct Tower : public GameObject {
 		}
 	}
 	~Tower() {
-	//	towers.erase(this);
 	}
 };

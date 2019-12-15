@@ -119,9 +119,9 @@ void Renderer::Update(float dt)
 	m_continous_time += dt;
 
 	tile->Update(dt);
-	for (auto ball : CannonBall::balls)ball->Update(dt, speed);
-	for (auto pirate : Pirate::pirates)pirate->Update(dt, speed);
-	for (auto tower : Tower::towers)tower->Update(dt);
+	for (auto ball : CannonBall::balls)if (ball!=NULL)ball->Update(dt, speed);
+	for (auto pirate : Pirate::pirates)if (pirate!=NULL)pirate->Update(dt, speed);
+	for (auto tower : Tower::towers)if (tower!=NULL)tower->Update(dt);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -404,9 +404,9 @@ void Renderer::RenderGeometry()
 	//skeleton_no_anim->Render(m_geometry_rendering_program);
 	tile->Render(m_geometry_rendering_program);
 	//cannonball->Render(m_geometry_rendering_program);
-	for (auto t : Tower::towers)t->Render(m_geometry_rendering_program);
-	for (auto p : Pirate::pirates)p->Render(m_geometry_rendering_program);
-	for (auto c : CannonBall::balls)c->Render(m_geometry_rendering_program);
+	for (auto t : Tower::towers)if(t!=NULL)t->Render(m_geometry_rendering_program);
+	for (auto p : Pirate::pirates)if(p!=NULL)p->Render(m_geometry_rendering_program);
+	for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 
 
 
@@ -487,13 +487,15 @@ void Renderer::RemoveTower() {
 	int y = (int)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
 	if (tilemap[x + y * tilemap_width]!=2)return;
 	tilemap[x + y * tilemap_width] = 0; //since we are going to make a new tower we are going to prevent further building on the same block
-	for (auto t = Tower::towers.cbegin(); t != Tower::towers.cend(); ++t) {
-		if ((int)((*t)->transformation_matrix[3][0]) == (int)(tile->transformation_matrix[3][0])
-			&& (int)((*t)->transformation_matrix[3][2]) == (int)(tile->transformation_matrix[3][2])) { //todo check
-			Tower::towers.erase(t);
-			break;
+	for (int i = 0; i < Tower::towers.size(); ++i) {
+		if (Tower::towers[i] == NULL)continue;
+		if (int(Tower::towers[i]->transformation_matrix[3][0]) == (int)(tile->transformation_matrix[3][0])
+			&& (int)(Tower::towers[i]->transformation_matrix[3][2]) == (int)(tile->transformation_matrix[3][2])) { //todo check
+			delete Tower::towers[i];
+			Tower::towers[i] = NULL;
 		}
 	}
+
 }
 
 void Renderer::BuildTower() {
