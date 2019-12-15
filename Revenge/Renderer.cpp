@@ -26,7 +26,6 @@ int tilemap_height = 10;
 GameObject* skeleton_no_anim = NULL;
 GameObject* tile = NULL;
 GameObject* cannonball = NULL;
-std::vector<GameObject*> towers;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -119,10 +118,10 @@ void Renderer::Update(float dt)
 
 	m_continous_time += dt;
 
-	skeleton_no_anim->Update(dt, speed);
 	tile->Update(dt);
-	cannonball->Update(dt);
-	for (GameObject* t : towers)t->Update(dt);
+	for (auto ball : CannonBall::balls)ball->Update(dt, speed);
+	for (auto pirate : Pirate::pirates)pirate->Update(dt, speed);
+	for (auto tower : Tower::towers)tower->Update(dt);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -402,12 +401,12 @@ void Renderer::RenderGeometry()
 
 
 
-	skeleton_no_anim->Render(m_geometry_rendering_program);
+	//skeleton_no_anim->Render(m_geometry_rendering_program);
 	tile->Render(m_geometry_rendering_program);
-	cannonball->Render(m_geometry_rendering_program);
-	for (GameObject* t : towers)t->Render(m_geometry_rendering_program);
-
-
+	//cannonball->Render(m_geometry_rendering_program);
+	for (auto t : Tower::towers)t->Render(m_geometry_rendering_program);
+	for (auto p : Pirate::pirates)p->Render(m_geometry_rendering_program);
+	for (auto c : CannonBall::balls)c->Render(m_geometry_rendering_program);
 
 
 
@@ -488,10 +487,10 @@ void Renderer::RemoveTower() {
 	int y = (int)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
 	if (tilemap[x + y * tilemap_width]!=2)return;
 	tilemap[x + y * tilemap_width] = 0; //since we are going to make a new tower we are going to prevent further building on the same block
-	for (std::vector<GameObject*>::const_iterator t = towers.cbegin(); t < towers.cend(); ++t) {
+	for (auto t = Tower::towers.cbegin(); t != Tower::towers.cend(); ++t) {
 		if ((int)((*t)->transformation_matrix[3][0]) == (int)(tile->transformation_matrix[3][0])
 			&& (int)((*t)->transformation_matrix[3][2]) == (int)(tile->transformation_matrix[3][2])) { //todo check
-			towers.erase(t);
+			Tower::towers.erase(t);
 			break;
 		}
 	}
@@ -502,7 +501,7 @@ void Renderer::BuildTower() {
 	int y = (int)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
 	if (tilemap[x + y * tilemap_width]!=0)return;
 	tilemap[x + y * tilemap_width] = 2; //since we are going to make a new tower we are going to prevent further building on the same block
-	towers.push_back(new GameObject(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(2, glm::vec3(0,0,0)),"tower"));
+	auto t1 = new Tower(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(2, glm::vec3(0,0,0)),"tower");
 }
 void FindPath(std::vector<glm::vec3>& path_arr, int* arr, int width, int height) {
 	for (int y = 0; y < tilemap_height; ++y) {

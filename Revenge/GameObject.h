@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <set>
 #include <string>
 #include "ShaderProgram.h"
 #include "SpotlightNode.h"
@@ -9,11 +9,12 @@
 #include "GLEW/glew.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "CircleCollider.h"
-#include <vector>
+#include <iostream>
+#include <set>
 
 
 struct GameObject {
-	static std::vector<GameObject*> objects;
+	static std::set<GameObject*> objects;
 	CircleCollider* col;
 	GeometryNode*								geometry;
 	ShaderProgram*								m_geometry_rendering_program;
@@ -27,7 +28,7 @@ struct GameObject {
 		transformation_matrix = transform;
 		transformation_normal_matrix = normal;
 		this->col = col;
-		objects.push_back(this); //push in GameObject array
+		objects.insert(this); //push in GameObject array
 	}
 
 	virtual void Render(ShaderProgram& shader) {
@@ -51,24 +52,32 @@ struct GameObject {
 
 	}
 	virtual void Update(float dt, int speed = 1.0f) {};
+	virtual ~GameObject() {
+		//auto iter = objects.find(this);
+		objects.erase(this);
+	}
 };
 bool CheckCollision(GameObject* g1, GameObject* g2);
+
 struct Pirate : public GameObject {
-	static std::vector<Pirate*> pirates;
+	static std::set<Pirate*> pirates;
 	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag): GameObject(geometry,transform, normal,col,tag) {
-		pirates.push_back(this);
+		pirates.insert(this);
 	}
 	void Update(float dt,int speed = 1) {
-		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -0)*dt*(float)speed);
+		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -3)*dt*(float)speed);
+	}
+	~Pirate() {
+		pirates.erase(this);
 	}
 };
 
 struct CannonBall : public GameObject {
-	static std::vector<CannonBall*> balls;
+	static std::set<CannonBall*> balls;
 	glm::vec3 dir;
 	float active_time; //tpdp implement logic
 	CannonBall(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, glm::vec3 dir,CircleCollider* col,std::string tag): GameObject(geometry,transform, normal,col,tag), dir(dir) {
-		CannonBall::balls.push_back(this);
+		CannonBall::balls.insert(this);
 	}
 	void Update(float dt,int speed = 1) {
 		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(float)speed);
@@ -77,5 +86,19 @@ struct CannonBall : public GameObject {
 			if (CheckCollision(this, (GameObject*)p))printf("collision!\n");
 			else printf("no collision\n");
 		}
+	}
+};
+
+struct Tower : public GameObject {
+	static std::set<Tower*> towers;
+	Tower(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag) : GameObject(geometry, transform, normal, col, tag) {
+		towers.insert(this);
+	}
+	void Update(float dt, int speed = 1) {
+		std::cout << towers.size()<< std::endl;
+	
+	}
+	~Tower() {
+		towers.erase(this);
 	}
 };
