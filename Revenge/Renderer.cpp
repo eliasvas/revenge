@@ -501,7 +501,7 @@ void Renderer::BuildTower() {
 	int y = (int)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
 	if (tilemap[x + y * tilemap_width]!=0)return;
 	tilemap[x + y * tilemap_width] = 2; //since we are going to make a new tower we are going to prevent further building on the same block
-	auto t1 = new Tower(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(2, glm::vec3(0,0,0)),"tower");
+	auto t1 = new Tower(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(3, glm::vec3(0,0,0)),"tower", ball);
 }
 void FindPath(std::vector<glm::vec3>& path_arr, int* arr, int width, int height) {
 	for (int y = 0; y < tilemap_height; ++y) {

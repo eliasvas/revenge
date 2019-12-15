@@ -4,10 +4,9 @@
 #include <iostream>
 
 
-std::set<CannonBall*> CannonBall::balls;
-std::set<Pirate*> Pirate::pirates;
-std::set<GameObject*> GameObject::objects;
-std::set<Tower*> Tower::towers;
+std::vector<CannonBall*> CannonBall::balls;
+std::vector<Pirate*> Pirate::pirates;
+std::vector<Tower*> Tower::towers;
 
 bool CheckCollision(GameObject* g1, GameObject* g2) {
 	if (g1 == NULL || g2 == NULL)return false;
