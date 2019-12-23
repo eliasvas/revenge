@@ -13,7 +13,7 @@
 #include <iostream>
 #include <vector>
 
-struct GameObject {
+struct Entity {
 	CircleCollider* col;
 	GeometryNode*								geometry;
 	ShaderProgram*								m_geometry_rendering_program;
@@ -21,7 +21,7 @@ struct GameObject {
 	glm::mat4									transformation_normal_matrix;
 	std::string tag;
 	bool active = true;
-	GameObject(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag) {
+	Entity(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag) {
 		this->geometry = geometry;
 		this->tag = tag;
 		transformation_matrix = transform;
@@ -50,14 +50,14 @@ struct GameObject {
 
 	}
 	virtual void Update(float dt, int speed = 1.0f) {};
-	~GameObject() {
+	~Entity() {
 	}
 };
-bool CheckCollision(GameObject* g1, GameObject* g2);
+bool CheckCollision(Entity* g1, Entity* g2);
 
-struct Pirate : public GameObject {
+struct Pirate : public Entity {
 	static std::vector<Pirate*> pirates;
-	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag): GameObject(geometry,transform, normal,col,tag) {
+	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag) {
 		pirates.push_back(this);
 	}
 	void Update(float dt,int speed = 1) {
@@ -68,13 +68,13 @@ struct Pirate : public GameObject {
 	}
 };
 
-struct CannonBall : public GameObject {
+struct CannonBall : public Entity {
 	static std::vector<CannonBall*> balls;
 	float life = 10.0f;
 	glm::vec3 down = {0.0f, -1.0f, 0.0f};
 	glm::vec3 dir;
 	float active_time; //todo implement logic
-	CannonBall(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, glm::vec3 dir,CircleCollider* col,std::string tag): GameObject(geometry,transform, normal,col,tag), dir(dir) {
+	CannonBall(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, glm::vec3 dir,CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag), dir(dir) {
 		CannonBall::balls.push_back(this);
 	}
 	void Update(float dt,int speed = 1) {
@@ -84,7 +84,7 @@ struct CannonBall : public GameObject {
 
 		for (Pirate* p : Pirate::pirates) {
 			if (p == NULL)continue;
-			//if (CheckCollision(this, (GameObject*)p))printf("collision!\n");
+			//if (CheckCollision(this, (Entity*)p))printf("collision!\n");
 			//else printf("no collision\n");
 		}
 		if (life < 0.0f) {
@@ -102,11 +102,11 @@ struct CannonBall : public GameObject {
 
 };
 
-struct Tower : public GameObject {
+struct Tower : public Entity {
 	static std::vector<Tower*> towers;
 	float rate;
 	GeometryNode* ball_mesh;
-	Tower(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag, GeometryNode* b_m) : GameObject(geometry, transform, normal, col, tag) {
+	Tower(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag, GeometryNode* b_m) : Entity(geometry, transform, normal, col, tag) {
 		rate = 0.0f;
 		ball_mesh = b_m;
 		towers.push_back(this);
@@ -116,12 +116,12 @@ struct Tower : public GameObject {
 		//std::cout << towers.size()<< std::endl;
 		for (Pirate* p : Pirate::pirates) {
 				if (p == NULL)continue;
-				if (CheckCollision(this, (GameObject*)p) && rate < 0) { //HUGE bottleneck
+				if (CheckCollision(this, (Entity*)p) && rate < 0) { //HUGE bottleneck
 					rate = 2.0f;
 					CircleCollider* c= new CircleCollider(1.0f, glm::vec3(0, 6, 0));
 					glm::vec3 p_pos = { p->transformation_matrix[3][0] ,p->transformation_matrix[3][1], p->transformation_matrix[3][2]};
 					glm::vec3 pos = { this->transformation_matrix[3][0] ,this->transformation_matrix[3][1], this->transformation_matrix[3][2]};
-					auto ballp = new CannonBall(ball_mesh,glm::translate(GameObject::transformation_matrix,c->offset),GameObject::transformation_normal_matrix,(p_pos-pos),c,GameObject::tag);
+					auto ballp = new CannonBall(ball_mesh,glm::translate(Entity::transformation_matrix,c->offset),Entity::transformation_normal_matrix,(p_pos-pos),c,Entity::tag);
 				}
 		}
 	}

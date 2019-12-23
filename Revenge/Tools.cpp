@@ -96,3 +96,54 @@ namespace Tools
 		return status;
 	}
 };
+
+bool in_bounds(int x, int y, int width, int height) {
+	//std::cout << x << "   " << y << std::endl;
+	return (x > 0 && x < width && y < height && y > 0);
+	int r = x + y * width;
+	return  (x > 0 && y > 0);
+}
+
+int count_ones(int* arr, int size) {
+	int s = 0;
+	for (int i = 0; i < size; ++i) {
+		if (arr[i] == 1)++s;
+	}
+	return s;
+}
+
+
+//the path MUST be connected and not containing any circles 
+std::vector<glm::vec2> find_path(int* arr, int width, int height) {
+	std::vector<glm::vec2> positions;
+	int k = 0;
+	positions.push_back({0,0});
+	int i = count_ones(arr, width*height);
+	int y = 0;
+	int x = 0;
+	while (i--) {
+		//std::cout << glm::to_string(positions.back()) << std::endl;
+		//printf("%d\n", (int)in_bounds(k + 1, width, height));
+		if (in_bounds(x+1,y, width, height) && positions.back() !=glm::vec2(x+1,y) && arr[x+1+y*width] == 1) {
+			positions.push_back(glm::vec2(x+1,y));
+			x++;
+		}
+		else if (in_bounds(x-1,y, width, height) && positions.back() !=glm::vec2(x-1,y) && arr[x-1+y*width] == 1) {
+			positions.push_back(glm::vec2(x-1,y));
+			x--;
+		}
+		else if (in_bounds(x,y+1, width, height) && positions.back() !=glm::vec2(x, y+1) && arr[x + (y+1)*width] == 1) {
+			positions.push_back(glm::vec2(x, y+1));
+			y++;
+		}else if (in_bounds(x, y-1, width, height) && positions.back() !=glm::vec2(x, y-1) && arr[x+ (y-1)*width] == 1) {
+			positions.push_back(glm::vec2(x,y-1));
+			y--;
+		}
+
+
+	}
+	return positions;
+}
+void print_vec2_arr(const std::vector<glm::vec2>& arr) {
+	for (glm::vec2 v : arr)std::cout << glm::to_string(v) << std::endl;
+}

@@ -1,10 +1,10 @@
+#pragma once
 #include <string>
 #include <iostream>
+#include <vector>
+#include "glm/glm.hpp"
 #include <glm/gtx/string_cast.hpp>
 #include "GLEW\glew.h"
-
-#ifndef TOOLS_H
-#define TOOLS_H
 
 namespace Tools
 {
@@ -20,5 +20,7 @@ namespace Tools
 
 	GLenum CheckFramebufferStatus(GLuint framebuffer_object);
 };
-
-#endif
+bool in_bounds(int index, int width, int height);
+int count_ones(int* arr, int size);
+std::vector<glm::vec2> find_path(int* arr, int width, int height);
+void print_vec2_arr(const std::vector<glm::vec2>& arr);

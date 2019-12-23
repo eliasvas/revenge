@@ -2,11 +2,13 @@
 #include "GeometryNode.h"
 #include "Tools.h"
 #include <algorithm>
+#include <vector>
 #include "ShaderProgram.h"
+#include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "OBJLoader.h"
-#include "GameObject.h"
+#include "Entity.h"
 #include "CircleCollider.h"
 
 int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
@@ -20,12 +22,12 @@ int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				0, 0, 0, 1 ,1, 1, 1, 0, 0, 0,
 				0, 0, 0, 0 ,0, 0, 0, 0, 0, 0
 			   };
-std::vector <glm::vec3> path;
+std::vector<glm::vec2> path = { {0,0},{1,0},{2,0},{2,1},{2,2} }; //just a test must be replaced by the real routing function
 int tilemap_width = 10;
 int tilemap_height = 10;
-GameObject* skeleton_no_anim = NULL;
-GameObject* tile = NULL;
-GameObject* cannonball = NULL;
+Entity* skeleton_no_anim = NULL;
+Entity* tile = NULL;
+Entity* cannonball = NULL;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -85,7 +87,9 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 		printf("Exiting with error at Renderer::Init\n");
 		return false;
 	}
-
+	
+	std::vector<glm::vec2> path = find_path(tilemap, tilemap_width, tilemap_height);
+	print_vec2_arr(path);
 
 	//If everything initialized
 	return techniques_initialization && items_initialization && buffers_initialization;
@@ -275,8 +279,7 @@ bool Renderer::InitGeometricMeshes()
 	ball_transformation_matrix = glm::translate(ball_transformation_matrix, glm::vec3(0,1,0));
 
 	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate");
-	tile = new GameObject(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
-	cannonball = new CannonBall(ball, ball_transformation_matrix, ball_transformation_normal_matrix, glm::vec3(1,0,0), new CircleCollider(1.0f,glm::vec3(0,0,0)), "cannonball");
+	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
 
 	return initialized;
 }
@@ -512,6 +515,10 @@ void FindPath(std::vector<glm::vec3>& path_arr, int* arr, int width, int height)
 		}
 	}
 }
+
+
+
+
 
 
 

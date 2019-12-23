@@ -138,7 +138,7 @@
     <ClCompile Include="..\3rdparty\inc\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\3rdparty\inc\imgui\imgui_impl_sdl.cpp" />
     <ClCompile Include="..\3rdparty\inc\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GeometricMesh.cpp" />
     <ClCompile Include="GeometryNode.cpp" />
     <ClCompile Include="main.cpp" />
@@ -154,7 +154,7 @@
     <ClInclude Include="CircleCollider.h" />
     <ClInclude Include="GeometricMesh.h" />
     <ClInclude Include="GeometryNode.h" />
-    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="OBJLoader.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Renderer.h" />
