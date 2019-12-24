@@ -54,7 +54,6 @@ struct Entity {
 	}
 };
 bool CheckCollision(Entity* g1, Entity* g2);
-
 struct Pirate : public Entity {
 	static std::vector<Pirate*> pirates;
 	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag) {
@@ -71,7 +70,7 @@ struct Pirate : public Entity {
 struct CannonBall : public Entity {
 	static std::vector<CannonBall*> balls;
 	float life = 10.0f;
-	glm::vec3 down = {0.0f, -1.0f, 0.0f};
+	glm::vec3 down = {0.0f, -1.5f, 0.0f};
 	glm::vec3 dir;
 	float active_time; //todo implement logic
 	CannonBall(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, glm::vec3 dir,CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag), dir(dir) {
@@ -79,8 +78,8 @@ struct CannonBall : public Entity {
 	}
 	void Update(float dt,int speed = 1) {
 		life -= dt;
-		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(float)speed*5.0f);
-		transformation_matrix = glm::translate(transformation_matrix, down*dt*(float)speed*5.0f);
+		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(float)speed*9.0f);
+		transformation_matrix = glm::translate(transformation_matrix, down*dt*(float)speed*9.0f);
 
 		for (Pirate* p : Pirate::pirates) {
 			if (p == NULL)continue;
@@ -121,7 +120,7 @@ struct Tower : public Entity {
 					CircleCollider* c= new CircleCollider(1.0f, glm::vec3(0, 6, 0));
 					glm::vec3 p_pos = { p->transformation_matrix[3][0] ,p->transformation_matrix[3][1], p->transformation_matrix[3][2]};
 					glm::vec3 pos = { this->transformation_matrix[3][0] ,this->transformation_matrix[3][1], this->transformation_matrix[3][2]};
-					auto ballp = new CannonBall(ball_mesh,glm::scale(glm::translate(Entity::transformation_matrix,glm::vec3(0,9,0)), glm::vec3(0.7,0.7,0.)),Entity::transformation_normal_matrix,(p_pos-pos),c,Entity::tag);
+					auto ballp = new CannonBall(ball_mesh,glm::scale(glm::translate(Entity::transformation_matrix,glm::vec3(0,9,0)), glm::vec3(0.7,0.7,0.7)),Entity::transformation_normal_matrix,(p_pos-pos),c,Entity::tag);
 				}
 		}
 	}
