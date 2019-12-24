@@ -121,7 +121,7 @@ struct Tower : public Entity {
 					CircleCollider* c= new CircleCollider(1.0f, glm::vec3(0, 6, 0));
 					glm::vec3 p_pos = { p->transformation_matrix[3][0] ,p->transformation_matrix[3][1], p->transformation_matrix[3][2]};
 					glm::vec3 pos = { this->transformation_matrix[3][0] ,this->transformation_matrix[3][1], this->transformation_matrix[3][2]};
-					auto ballp = new CannonBall(ball_mesh,glm::translate(Entity::transformation_matrix,c->offset),Entity::transformation_normal_matrix,(p_pos-pos),c,Entity::tag);
+					auto ballp = new CannonBall(ball_mesh,glm::scale(glm::translate(Entity::transformation_matrix,glm::vec3(0,9,0)), glm::vec3(0.7,0.7,0.)),Entity::transformation_normal_matrix,(p_pos-pos),c,Entity::tag);
 				}
 		}
 	}
