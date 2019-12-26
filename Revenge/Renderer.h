@@ -39,6 +39,9 @@ protected:
 	SpotLightNode m_spotlight_node;
 
 	// Meshes
+	class GeometryNode*								treasure;
+	glm::mat4										treasure_transformation_matrix;
+	glm::mat4										treasure_transformation_normal_matrix;
 	class GeometryNode*								ball;
 	glm::mat4										ball_transformation_matrix;
 	glm::mat4										ball_transformation_normal_matrix;
@@ -93,12 +96,6 @@ public:
 	void										CameraMoveLeft(bool enable);
 	void										CameraMoveRight(bool enable);
 	void										CameraLook(glm::vec2 lookDir);	
-
-	// Skeleton Move Functions
-	void										SkeletonMoveForward(bool enable);
-	void										SkeletonMoveBackWard(bool enable);
-	void										SkeletonMoveLeft(bool enable);
-	void										SkeletonMoveRight(bool enable);
 
 	void										move_green_plane(glm::vec3 mov);
 	void BuildTower();

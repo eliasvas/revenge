@@ -12,6 +12,10 @@
 #include "OBJLoader.h"
 #include <iostream>
 #include <vector>
+#include "glm/gtx/string_cast.hpp"
+#include "SDL2/SDL_timer.h"
+#include "algorithm"
+#include "tgmath.h"
 
 struct Entity {
 	CircleCollider* col;
@@ -55,12 +59,53 @@ struct Entity {
 };
 bool CheckCollision(Entity* g1, Entity* g2);
 struct Pirate : public Entity {
+	std::vector<glm::vec2> path;
+	float speed = 1.0f;
+	float time_elapsed = 0.0f;
+	int tile = 0;
 	static std::vector<Pirate*> pirates;
+	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag,std::vector<glm::vec2>& path): Entity(geometry,transform, normal,col,tag) {
+		this->path = path;
+		pirates.push_back(this);
+	}
+	//V should be removed
 	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag) {
 		pirates.push_back(this);
 	}
 	void Update(float dt,int speed = 1) {
-		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -3)*dt*(float)speed);
+		time_elapsed += dt;
+		//std::cout << time_elapsed << std::endl;
+		if (time_elapsed > (float)speed) {
+			//std::cout << "next tile" << std::endl;
+			time_elapsed = 0.0f;
+			transformation_matrix[3][0] = 2*path[tile+1].g;
+			transformation_matrix[3][2] = 2*path[tile+1].r;
+			tile++;
+			if (tile < path.size() - 1) {
+				//atan2(direction.y, -direction.x)
+				float angle = atan2(path[tile+1].g - path[tile].g, path[tile+1].r - path[tile].r);
+				std::cout << angle << std::endl;
+				transformation_matrix = glm::rotate(transformation_matrix,angle, glm::vec3(0, 1, 0));
+			}
+		}
+		glm::vec3 start = glm::vec3(path[tile].g, 0, path[tile].r);
+		glm::vec3 end;
+		if (tile < path.size() - 1) //omg
+			end = glm::vec3(path[tile + 1].g, 0, path[tile + 1].r);
+		else {
+			for (int i = 0; i < pirates.size(); ++i) {
+				if (pirates[i] == this) {
+					delete pirates[i];
+					pirates[i] = NULL;
+				}
+			}
+
+		}
+		std::cout << glm::to_string(glm::mix(start, end,std::min(time_elapsed,1.0f))) << std::endl;
+		glm::vec3 offset = glm::mix(start, end, std::min(time_elapsed,1.0f));
+		transformation_matrix[3][0] = 2*offset.x;
+		transformation_matrix[3][2] = 2*offset.z;
+		
 	}
 	~Pirate() {
 	//	pirates.erase(this);

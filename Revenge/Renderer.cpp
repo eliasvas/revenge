@@ -7,9 +7,10 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-#include "OBJLoader.h"
 #include "Entity.h"
+#include "OBJLoader.h"
 #include "CircleCollider.h"
+#include "time.h"
 
 int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				1, 0, 0, 0 ,0, 0, 1, 1, 1, 1,
@@ -22,12 +23,14 @@ int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				0, 0, 0, 1 ,1, 1, 1, 0, 0, 0,
 				0, 0, 0, 0 ,0, 0, 0, 0, 0, 0
 			   };
-std::vector<glm::vec2> path = { {0,0},{1,0},{2,0},{2,1},{2,2} }; //just a test must be replaced by the real routing function
+std::vector<glm::vec2> path = { {0,0},{1,0},{2,0},{3,0},{3,1},{4,1},{5,1},{6,1},{7,1},{7,2}, {7,3}, {8,3}, {8,4}, {8,5}, {8,6}, {7,6}, 
+{6,6}, {6,7}, {5,7},{4,7},{3,7}, {3,8},{3,9},{2,9}, {1,9}, {1,8}, {1,7}, {1,6}, {0,6} }; //just a test must be replaced by the real routing function
 int tilemap_width = 10;
 int tilemap_height = 10;
 Entity* skeleton_no_anim = NULL;
 Entity* tile = NULL;
 Entity* cannonball = NULL;
+Entity* chest = NULL;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -278,7 +281,15 @@ bool Renderer::InitGeometricMeshes()
 	ball_transformation_matrix = glm::scale(ball_transformation_matrix, glm::vec3(0.1f));
 	ball_transformation_matrix = glm::translate(ball_transformation_matrix, glm::vec3(0,1,0));
 
-	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate");
+	mesh = nullptr;
+	mesh = loader.load("../Data/Treasure/treasure_chest.obj");
+	if (mesh != nullptr) {
+		treasure = new GeometryNode();
+		treasure->Init(mesh);
+	}
+
+
+	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
 	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
 
 	return initialized;
@@ -410,6 +421,7 @@ void Renderer::RenderGeometry()
 	for (auto t : Tower::towers)if(t!=NULL)t->Render(m_geometry_rendering_program);
 	for (auto p : Pirate::pirates)if(p!=NULL)p->Render(m_geometry_rendering_program);
 	for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
+	//for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 
 
 
@@ -460,24 +472,6 @@ void Renderer::CameraLook(glm::vec2 lookDir)
 	m_camera_look_angle_destination = glm::vec2(1, -1) * lookDir;
 }
 
-// Set the skeleton move direction
-void Renderer::SkeletonMoveForward(bool enable)
-{
-	m_skeleton_movement.x = (enable) ? 1.f : 0.f;
-}
-void Renderer::SkeletonMoveBackWard(bool enable)
-{
-	m_skeleton_movement.x = (enable) ? -1.f : 0.f;
-}
-
-void Renderer::SkeletonMoveLeft(bool enable)
-{
-	m_skeleton_movement.y = (enable) ? -1.f : 0.f;
-}
-void Renderer::SkeletonMoveRight(bool enable)
-{
-	m_skeleton_movement.y = (enable) ? 1.f : 0.f;
-}
 void Renderer::move_green_plane(glm::vec3 mov) {
 	if (tile == NULL)return;
 	if (tile->transformation_matrix[3][0] + mov[0] >= 0 && tile->transformation_matrix[3][0] + mov[0] < tilemap_width * 2
