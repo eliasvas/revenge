@@ -129,6 +129,7 @@ void Renderer::Update(float dt)
 	for (auto ball : CannonBall::balls)if (ball!=NULL)ball->Update(dt, speed);
 	for (auto pirate : Pirate::pirates)if (pirate!=NULL)pirate->Update(dt, speed);
 	for (auto tower : Tower::towers)if (tower!=NULL)tower->Update(dt);
+	chest->Update(dt);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -287,10 +288,13 @@ bool Renderer::InitGeometricMeshes()
 		treasure = new GeometryNode();
 		treasure->Init(mesh);
 	}
+	treasure_transformation_matrix = glm::scale(treasure_transformation_matrix,glm::vec3(0.05));
+	treasure_transformation_matrix = glm::translate(treasure_transformation_matrix, glm::vec3(240,0,0));
 
 
 	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
 	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
+	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure");
 
 	return initialized;
 }
@@ -422,7 +426,7 @@ void Renderer::RenderGeometry()
 	for (auto p : Pirate::pirates)if(p!=NULL)p->Render(m_geometry_rendering_program);
 	for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 	//for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
-
+	chest->Render(m_geometry_rendering_program);
 
 
 

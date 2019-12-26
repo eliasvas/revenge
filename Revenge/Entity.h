@@ -84,7 +84,6 @@ struct Pirate : public Entity {
 			if (tile < path.size() - 1) {
 				//atan2(direction.y, -direction.x)
 				float angle = atan2(path[tile+1].g - path[tile].g, path[tile+1].r - path[tile].r);
-				std::cout << angle << std::endl;
 				transformation_matrix = glm::rotate(transformation_matrix,angle, glm::vec3(0, 1, 0));
 			}
 		}
@@ -172,3 +171,22 @@ struct Tower : public Entity {
 	~Tower() {
 	}
 };
+
+struct Treasure : public Entity {
+	int last_pirate_to_collide = 0;
+	Treasure(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag) : Entity(geometry, transform, normal, col, tag) {
+	}
+	void Update(float dt, int speed = 1) {
+		for (Pirate* p : Pirate::pirates) {
+				if (p == NULL)continue;
+				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (int)p) { //HUGE bottleneck
+					//currency -1
+					last_pirate_to_collide = (int)p;
+				}
+		}
+	}
+	//void Render();
+	~Treasure() {
+	}
+};
+
