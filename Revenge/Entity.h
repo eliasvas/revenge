@@ -34,6 +34,8 @@ struct Entity {
 	}
 
 	virtual void Render(ShaderProgram& shader) {
+		if (!active)return;
+		//if (transformation_matrix[3][2] < 0)return; //MUST REMOVE
 		glBindVertexArray(geometry->m_vao);
 		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_matrix));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
@@ -57,7 +59,9 @@ struct Entity {
 	~Entity() {
 	}
 };
+
 bool CheckCollision(Entity* g1, Entity* g2);
+
 struct Pirate : public Entity {
 	std::vector<glm::vec2> path;
 	float speed = 1.0f;
@@ -73,8 +77,8 @@ struct Pirate : public Entity {
 		pirates.push_back(this);
 	}
 	void Update(float dt,int speed = 1) {
+		if (!active)return;
 		time_elapsed += dt;
-		//std::cout << time_elapsed << std::endl;
 		if (time_elapsed > (float)speed) {
 			//std::cout << "next tile" << std::endl;
 			time_elapsed = 0.0f;
@@ -100,11 +104,9 @@ struct Pirate : public Entity {
 			}
 
 		}
-		std::cout << glm::to_string(glm::mix(start, end,std::min(time_elapsed,1.0f))) << std::endl;
 		glm::vec3 offset = glm::mix(start, end, std::min(time_elapsed,1.0f));
 		transformation_matrix[3][0] = 2*offset.x;
 		transformation_matrix[3][2] = 2*offset.z;
-		
 	}
 	~Pirate() {
 	//	pirates.erase(this);
@@ -121,6 +123,7 @@ struct CannonBall : public Entity {
 		CannonBall::balls.push_back(this);
 	}
 	void Update(float dt,int speed = 1) {
+		if (!active)return;
 		life -= dt;
 		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(float)speed*9.0f);
 		transformation_matrix = glm::translate(transformation_matrix, down*dt*(float)speed*9.0f);
@@ -155,6 +158,7 @@ struct Tower : public Entity {
 		towers.push_back(this);
 	}
 	void Update(float dt, int speed = 1) {
+		if (!active)return;
 		rate -= dt;
 		//std::cout << towers.size()<< std::endl;
 		for (Pirate* p : Pirate::pirates) {

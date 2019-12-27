@@ -100,6 +100,7 @@ public:
 	void										move_green_plane(glm::vec3 mov);
 	void BuildTower();
 	void RemoveTower();
+	void SpawnPirate();
 };
 
 #endif

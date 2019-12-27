@@ -227,6 +227,9 @@ int main(int argc, char *argv[])
 				{
 					renderer->RemoveTower();
 				}
+				else if (event.key.keysym.sym == SDLK_c) {
+					renderer->SpawnPirate();
+				}
 
 			}
 			else if (event.type == SDL_MOUSEMOTION&& show_options == false)

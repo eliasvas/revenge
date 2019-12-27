@@ -25,7 +25,6 @@ Because sometimes there are faces that point to not yet defined vertices we will
 */
 GeometricMesh* OBJLoader::load(const char* filename)
 {
-	printf("Start ObjReading MeshNext reading\n");
 
 	shared_vertices.clear();
 	shared_normals.clear();
@@ -84,7 +83,7 @@ GeometricMesh* OBJLoader::load(const char* filename)
 	// close the last object
 	mesh->objects.back().end = static_cast<unsigned int>(mesh->vertices.size());
 
-	printf("Done reading OBJ file \n");
+	//printf("Done reading OBJ file \n");
 
 	// remove empty objects
 	mesh->objects.erase(std::remove_if(mesh->objects.begin(), mesh->objects.end(), [](GeometricMesh::MeshObject ob) { return ob.start == ob.end; }), mesh->objects.end());
@@ -410,7 +409,7 @@ void OBJLoader::parseMTL(const char* filename)
 		std::cerr << "Cannot open material " << filename << std::endl;
 		exit(1);
 	}
-	printf("Opened %s\n", filename);
+	//printf("Opened %s\n", filename);
 
 	std::string folder(filename);
 	folder = Tools::GetFolderPath(folder.c_str());

@@ -91,8 +91,8 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 		return false;
 	}
 	
-	std::vector<glm::vec2> path = find_path(tilemap, tilemap_width, tilemap_height);
-	print_vec2_arr(path);
+	//std::vector<glm::vec2> path = find_path(tilemap, tilemap_width, tilemap_height);
+	//print_vec2_arr(path);
 
 	//If everything initialized
 	return techniques_initialization && items_initialization && buffers_initialization;
@@ -293,6 +293,7 @@ bool Renderer::InitGeometricMeshes()
 
 
 	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
+	skeleton_no_anim->active = false;
 	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
 	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure");
 
@@ -513,8 +514,9 @@ void FindPath(std::vector<glm::vec3>& path_arr, int* arr, int width, int height)
 		}
 	}
 }
-
-
+void Renderer::SpawnPirate() {
+	Entity* skeleton_no_anim = new Pirate(skeleton, skeleton_transformation_matrix, skeleton_transformation_normal_matrix, new CircleCollider(1.0f, glm::vec3(0, 0.5, 0)), "pirate", path);
+}
 
 
 
