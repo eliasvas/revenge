@@ -25,6 +25,7 @@ struct Entity {
 	glm::mat4									transformation_normal_matrix;
 	std::string tag;
 	bool active = true;
+	Entity() {}
 	Entity(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag) {
 		this->geometry = geometry;
 		this->tag = tag;
@@ -68,6 +69,7 @@ struct Pirate : public Entity {
 	float time_elapsed = 0.0f;
 	int tile = 0;
 	static std::vector<Pirate*> pirates;
+	Pirate() {}
 	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag,std::vector<glm::vec2>& path): Entity(geometry,transform, normal,col,tag) {
 		this->path = path;
 		pirates.push_back(this);

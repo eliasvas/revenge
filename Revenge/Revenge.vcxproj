@@ -162,6 +162,7 @@
     <ClInclude Include="SpotlightNode.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="text_rendering.h" />
+    <ClInclude Include="Timed_Spawner.h" />
     <ClInclude Include="Tools.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

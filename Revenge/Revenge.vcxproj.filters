@@ -101,5 +101,8 @@
     <ClInclude Include="text_rendering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Timed_Spawner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

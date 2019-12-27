@@ -11,6 +11,7 @@
 #include "OBJLoader.h"
 #include "CircleCollider.h"
 #include "time.h"
+#include "Timed_Spawner.h"
 
 int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				1, 0, 0, 0 ,0, 0, 1, 1, 1, 1,
@@ -31,6 +32,7 @@ Entity* skeleton_no_anim = NULL;
 Entity* tile = NULL;
 Entity* cannonball = NULL;
 Entity* chest = NULL;
+Timed_Spawner* t;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -130,6 +132,7 @@ void Renderer::Update(float dt)
 	for (auto pirate : Pirate::pirates)if (pirate!=NULL)pirate->Update(dt, speed);
 	for (auto tower : Tower::towers)if (tower!=NULL)tower->Update(dt);
 	chest->Update(dt);
+	t->Update(dt);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -296,7 +299,9 @@ bool Renderer::InitGeometricMeshes()
 	skeleton_no_anim->active = false;
 	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
 	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure");
+	
 
+	t = new Timed_Spawner(10.0f, 3, 1.0f,(Pirate*)skeleton_no_anim);
 	return initialized;
 }
 
