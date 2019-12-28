@@ -100,7 +100,7 @@ struct Pirate : public Entity {
 		}
 		glm::vec3 start = glm::vec3(path[tile].g, 0, path[tile].r);
 		glm::vec3 end;
-		if (tile < path.size() - 1) //omg
+		if (tile < path.size() - 1 && active) //omg
 			end = glm::vec3(path[tile + 1].g, 0, path[tile + 1].r);
 		else {
 			for (int i = 0; i < pirates.size(); ++i) {

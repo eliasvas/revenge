@@ -3,4 +3,5 @@
 @make path for skeleton pirates
 @make a skybox --cubemap
 @shadows
-@text rendering
+@text rendering --first make a 2D renderer
+@particles
