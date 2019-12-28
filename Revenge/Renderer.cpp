@@ -301,7 +301,7 @@ bool Renderer::InitGeometricMeshes()
 	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure");
 	
 
-	t = new Timed_Spawner(10.0f, 3, 1.0f,(Pirate*)skeleton_no_anim);
+	t = new Timed_Spawner(10.0f, 1, 1.0f,(Pirate*)skeleton_no_anim);
 	return initialized;
 }
 
@@ -502,7 +502,7 @@ void Renderer::RemoveTower() {
 			Tower::towers[i] = NULL;
 		}
 	}
-
+	((Treasure*)chest)->money += 50;
 }
 
 void Renderer::BuildTower() {
@@ -511,6 +511,7 @@ void Renderer::BuildTower() {
 	if (tilemap[x + y * tilemap_width]!=0)return;
 	tilemap[x + y * tilemap_width] = 2; //since we are going to make a new tower we are going to prevent further building on the same block
 	auto t1 = new Tower(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(3, glm::vec3(0,0,0)),"tower", ball);
+	((Treasure*)chest)->money -= 100;
 }
 void FindPath(std::vector<glm::vec3>& path_arr, int* arr, int width, int height) {
 	for (int y = 0; y < tilemap_height; ++y) {

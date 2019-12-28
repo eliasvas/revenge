@@ -19,6 +19,7 @@ int music_volume = 5;
 SDL_GLContext gContext;
 const int SCREEN_WIDTH = 1380;	//800;	//640;
 const int SCREEN_HEIGHT = 1024;	//600;	//480;
+int money = 1000;
 //int speed = 1;
 
 //Event handler

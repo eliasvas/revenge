@@ -68,6 +68,7 @@ struct Pirate : public Entity {
 	float speed = 1.0f;
 	float time_elapsed = 0.0f;
 	int tile = 0;
+	int life = 2;
 	static std::vector<Pirate*> pirates;
 	Pirate() {}
 	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag,std::vector<glm::vec2>& path): Entity(geometry,transform, normal,col,tag) {
@@ -80,6 +81,10 @@ struct Pirate : public Entity {
 	}
 	void Update(float dt,int speed = 1) {
 		if (!active)return;
+		if (life < 0) {
+			active = false;//must destroy but wtv
+			
+		}
 		time_elapsed += dt;
 		if (time_elapsed > (float)speed) {
 			//std::cout << "next tile" << std::endl;
@@ -117,25 +122,28 @@ struct Pirate : public Entity {
 
 struct CannonBall : public Entity {
 	static std::vector<CannonBall*> balls;
-	float life = 10.0f;
 	glm::vec3 down = {0.0f, -1.5f, 0.0f};
 	glm::vec3 dir;
+	int last_pirate_to_collide = 0;
 	float active_time; //todo implement logic
 	CannonBall(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, glm::vec3 dir,CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag), dir(dir) {
 		CannonBall::balls.push_back(this);
 	}
 	void Update(float dt,int speed = 1) {
 		if (!active)return;
-		life -= dt;
-		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(float)speed*9.0f);
-		transformation_matrix = glm::translate(transformation_matrix, down*dt*(float)speed*9.0f);
+		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(float)speed*30.0f); //find a true relation in terms of speed
+		transformation_matrix = glm::translate(transformation_matrix, down*dt*(float)speed*30.0f);
 
 		for (Pirate* p : Pirate::pirates) {
-			if (p == NULL)continue;
-			//if (CheckCollision(this, (Entity*)p))printf("collision!\n");
-			//else printf("no collision\n");
+				if (p == NULL)continue;
+				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (int)p) { //HUGE bottleneck
+					last_pirate_to_collide = (int)p;
+					std::cout << "Collision!!" << std::endl;
+					p->life--;
+				}
 		}
-		if (life < 0.0f) {
+
+		if (transformation_matrix[3][1] < -1) {
 			for (int i = 0; i < balls.size(); ++i) {
 				if (balls[i] == this) {
 					delete balls[i];
@@ -165,9 +173,9 @@ struct Tower : public Entity {
 		//std::cout << towers.size()<< std::endl;
 		for (Pirate* p : Pirate::pirates) {
 				if (p == NULL)continue;
-				if (CheckCollision(this, (Entity*)p) && rate < 0) { //HUGE bottleneck
+				if (CheckCollision(this, (Entity*)p) && rate < 0&& p->active) { //HUGE bottleneck
 					rate = 2.0f;
-					CircleCollider* c= new CircleCollider(1.0f, glm::vec3(0, 6, 0));
+					CircleCollider* c= new CircleCollider(0.5f, glm::vec3(0, 0, 0));
 					glm::vec3 p_pos = { p->transformation_matrix[3][0] ,p->transformation_matrix[3][1], p->transformation_matrix[3][2]};
 					glm::vec3 pos = { this->transformation_matrix[3][0] ,this->transformation_matrix[3][1], this->transformation_matrix[3][2]};
 					auto ballp = new CannonBall(ball_mesh,glm::scale(glm::translate(Entity::transformation_matrix,glm::vec3(0,9,0)), glm::vec3(0.7,0.7,0.7)),Entity::transformation_normal_matrix,(p_pos-pos),c,Entity::tag);
@@ -180,13 +188,19 @@ struct Tower : public Entity {
 
 struct Treasure : public Entity {
 	int last_pirate_to_collide = 0;
+	int money = 1000;
 	Treasure(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag) : Entity(geometry, transform, normal, col, tag) {
 	}
 	void Update(float dt, int speed = 1) {
+		printf("%i\n", money);
+		if (money <= 0) {
+			printf("Game Over!");
+			exit(0);
+		}
 		for (Pirate* p : Pirate::pirates) {
 				if (p == NULL)continue;
 				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (int)p) { //HUGE bottleneck
-					//currency -1
+					money -= 100;
 					last_pirate_to_collide = (int)p;
 				}
 		}
