@@ -122,7 +122,8 @@ void Renderer::Update(float dt)
 	direction = rotation * glm::vec4(direction, 0);
 	float dist = glm::distance(m_camera_position, m_camera_target_position);
 	m_camera_target_position = m_camera_position + direction * dist;
-
+	
+	//IMPORTANT
 	m_view_matrix = glm::lookAt(m_camera_position, m_camera_target_position, m_camera_up_vector);
 
 	m_continous_time += dt;
@@ -182,6 +183,16 @@ bool Renderer::InitRenderingTechniques()
 	m_particle_rendering_program.LoadUniform("uniform_view_matrix");
 	m_particle_rendering_program.LoadUniform("uniform_projection_matrix");
 
+
+	//skybox rendering program
+	vertex_shader_path = "../Data/Shaders/skybox_rendering.vert";
+	fragment_shader_path = "../Data/Shaders/skybox_rendering.frag";
+	skybox_rendering_program.LoadVertexShaderFromFile(vertex_shader_path.c_str());
+	skybox_rendering_program.LoadFragmentShaderFromFile(fragment_shader_path.c_str());
+	initialized = initialized && skybox_rendering_program.CreateProgram();
+	skybox_rendering_program.LoadUniform("uniform_view_matrix");
+	skybox_rendering_program.LoadUniform("uniform_projection_matrix");
+
 	return initialized;
 }
 
@@ -217,7 +228,7 @@ bool Renderer::InitLightSources()
 	m_spotlight_node.SetPosition(glm::vec3(12, 18, -3));
 	m_spotlight_node.SetTarget(glm::vec3(0, 2, 0));
 
-	m_spotlight_node.SetColor(80.0f * glm::vec3(255, 255, 251) / 255.f);
+	m_spotlight_node.SetColor(80.0f * glm::vec3(155, 155, 255) / 255.f); //HERE IS THE LIGHT COLOR CHANGE!!!!!!!!!!!!!!!!!!!!!
 	m_spotlight_node.SetConeSize(500, 700);
 	m_spotlight_node.CastShadow(true);
 
@@ -301,7 +312,18 @@ bool Renderer::InitGeometricMeshes()
 	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure");
 	
 
-	t = new Timed_Spawner(10.0f, 1, 1.0f,(Pirate*)skeleton_no_anim);
+	t = new Timed_Spawner(10.0f, 2, 1.0f,(Pirate*)skeleton_no_anim);
+
+	std::vector<std::string> faces = {
+		"../Data/Various/ame_nebula/purplenebula_rt.tga",
+		"../Data/Various/ame_nebula/purplenebula_lf.tga",
+		"../Data/Various/ame_nebula/purplenebula_up.tga",
+		"../Data/Various/ame_nebula/purplenebula_dn.tga",
+		"../Data/Various/ame_nebula/purplenebula_bk.tga",
+		"../Data/Various/ame_nebula/purplenebula_ft.tga"
+	};
+	skybox = new Skybox(faces);
+
 	return initialized;
 }
 
@@ -312,7 +334,8 @@ void Renderer::SetRenderingMode(RENDERING_MODE mode)
 
 void Renderer::Render()
 {
-	// Draw the geometry
+	//render the skybox
+	//then draw the geometry
 	RenderGeometry();
 
 	GLenum error = Tools::CheckGLError();
@@ -347,7 +370,13 @@ void Renderer::RenderGeometry()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 		break;
 	};
+
+	skybox_rendering_program.Bind();
+	glUniformMatrix4fv(skybox_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
+	glUniformMatrix4fv(skybox_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
 	
+	skybox->Render(skybox_rendering_program);
+
 	// Bind the shader program
 	m_geometry_rendering_program.Bind();
 	

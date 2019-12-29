@@ -7,6 +7,7 @@
 #include "ShaderProgram.h"
 #include "SpotlightNode.h"
 #include "ParticleSystem.h"
+#include "Skybox.h"
 
 class Renderer
 {
@@ -70,10 +71,12 @@ protected:
 	bool InitGeometricMeshes();
 
 	ShaderProgram								m_geometry_rendering_program;
+	ShaderProgram								skybox_rendering_program;
 
 	ParticleEmitter								m_particle_emitter;
 	ParticleSwirl								m_particle_swirl;
 	ShaderProgram								m_particle_rendering_program;
+	Skybox*										skybox;
 
 public:
 	Renderer();

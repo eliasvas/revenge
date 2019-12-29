@@ -192,7 +192,7 @@ struct Treasure : public Entity {
 	Treasure(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag) : Entity(geometry, transform, normal, col, tag) {
 	}
 	void Update(float dt, int speed = 1) {
-		printf("%i\n", money);
+		//printf("%i\n", money);
 		if (money <= 0) {
 			printf("Game Over!");
 			exit(0);

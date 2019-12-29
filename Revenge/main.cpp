@@ -9,6 +9,8 @@
 #include "Renderer.h"
 #include <thread>         // std::this_thread::sleep_for
 #include "Tools.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 using namespace std;
 
 //Screen attributes
