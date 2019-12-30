@@ -11,13 +11,13 @@ struct Timed_Spawner {
 	float spawn_queue= 0.0f;
 	Pirate* base;
 	Timed_Spawner(float interval, int spawn_instances, float spawn_offset, Pirate* base) {
+		assert(base != NULL);
 		this->interval = interval;
 		time = interval;
 		this->spawn_instances = spawn_instances;
 		this->spawn_offset = spawn_offset;
 		this->base = base;
 		base->active = false;
-		//assert(base != NULL);
 	}
 	void Update(float dt) {
 		if (spawn_queue > 0.f) { //<- there is something in the queue

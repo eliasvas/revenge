@@ -370,6 +370,8 @@ void Renderer::RenderGeometry()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 		break;
 	};
+	//we need to first disable the glDepthTest so as to draw only 
+	//on the color buffer
 
 	skybox_rendering_program.Bind();
 	glUniformMatrix4fv(skybox_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
