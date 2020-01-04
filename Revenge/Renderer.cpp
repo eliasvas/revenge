@@ -34,6 +34,7 @@ Entity* cannonball = NULL;
 Entity* chest = NULL;
 Timed_Spawner* t;
 Pirate* p1;
+float pirates_to_spawn = 1.0f;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -103,6 +104,10 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 
 void Renderer::Update(float dt)
 {
+	t->spawn_instances = (int)pirates_to_spawn; //ugly AF
+	if (pirates_to_spawn <5.5)
+		pirates_to_spawn += (float)dt / 20;
+	printf("%f\n", pirates_to_spawn);
 	float movement_speed = 2.0f;
 	glm::vec3 direction = glm::normalize(m_camera_target_position - m_camera_position);
 
@@ -345,7 +350,7 @@ bool Renderer::InitGeometricMeshes()
 	p1->active = false;
 
 
-	t = new Timed_Spawner(10.0f, 2, 1.0f,(Pirate*)p1); //change to size of horde
+	t = new Timed_Spawner(10.0f, (int)pirates_to_spawn, 1.0f,(Pirate*)p1); //change to size of horde
 
 	std::vector<std::string> faces = {
 		"../Data/Various/ame_nebula/purplenebula_rt.tga",
