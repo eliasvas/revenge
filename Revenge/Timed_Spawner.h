@@ -21,7 +21,8 @@ struct Timed_Spawner {
 	}
 	void Update(float dt) {
 		if (spawn_queue > 0.f) { //<- there is something in the queue
-			if ((int)(spawn_queue - dt) != (int)spawn_queue)Entity* skeleton_no_anim = new Pirate(base->geometry, base->transformation_matrix,base->transformation_normal_matrix, new CircleCollider(1.0f, glm::vec3(0, 0.5, 0)), "pirate", base->path);
+			//put the right component in constructor down
+			if ((int)(spawn_queue - dt) != (int)spawn_queue)Entity* skeleton_no_anim = new Pirate(base->geometry, base->geometry_arm, base->geometry_lleg, base->geometry_rleg, base->transformation_matrix,base->transformation_normal_matrix, new CircleCollider(1.0f, glm::vec3(0, 0.5, 0)), "pirate", base->path);
 			spawn_queue-=dt;
 		}
 		time += dt;

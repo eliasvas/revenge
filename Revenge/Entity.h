@@ -64,23 +64,50 @@ struct Entity {
 bool CheckCollision(Entity* g1, Entity* g2);
 
 struct Pirate : public Entity {
+	GeometryNode* geometry_arm;
+	GeometryNode* geometry_lleg;
+	GeometryNode* geometry_rleg;
 	std::vector<glm::vec2> path;
-	float speed = 1.0f;
+	float time = 0.0f;	
 	float time_elapsed = 0.0f;
 	int tile = 0;
 	int life = 2;
+
+
+	//walking animation 
+
+	float x = 0;
+	float y = 0;
+	float rl = 0;
+	float fl = 0;
+	float b = 0;
+	
+	//death animation
+	float dl = 0;
+
+	//vec3
+	float vx = 1;
+	float vy = 0;
+	float vz = 0;
+
+	//limit values
+	bool hand = true;
+	bool leg = true;
+	bool body = true;
+
 	static std::vector<Pirate*> pirates;
-	Pirate() {}
-	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag,std::vector<glm::vec2>& path): Entity(geometry,transform, normal,col,tag) {
+	Pirate(GeometryNode* geometry, GeometryNode* geometry_arm, GeometryNode* geometry_lleg, GeometryNode* geometry_rleg, glm::mat4 transform, glm::mat4 normal,CircleCollider* col, std::string tag, std::vector<glm::vec2>& path) : Entity(geometry, transform, normal, col,tag) {
+			
+		this->geometry_arm = geometry_arm;
+		this->geometry_lleg = geometry_lleg;
+		this->geometry_rleg = geometry_rleg;
 		this->path = path;
+		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, -2, 0));
 		pirates.push_back(this);
 	}
-	//V should be removed
-	Pirate(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag) {
-		pirates.push_back(this);
-	}
-	void Update(float dt,int speed = 1) {
+	void Update(float dt, int speed = 1) {
 		if (!active)return;
+		time += dt;
 		if (life < 0) {
 			active = false;//must destroy but wtv
 			
@@ -92,9 +119,9 @@ struct Pirate : public Entity {
 			transformation_matrix[3][0] = 2*path[tile+1].g;
 			transformation_matrix[3][2] = 2*path[tile+1].r;
 			tile++;
-			if (tile < path.size() - 1) {
+			if (tile < path.size() - 1 && false) {
 				//atan2(direction.y, -direction.x)
-				float angle = atan2(path[tile+1].g - path[tile].g, path[tile+1].r - path[tile].r);
+				float angle = atan2(path[tile+1].g - path[tile].g, path[tile].r - path[tile+1].r) + glm::radians(90.0f);
 				transformation_matrix = glm::rotate(transformation_matrix,angle, glm::vec3(0, 1, 0));
 			}
 		}
@@ -114,9 +141,128 @@ struct Pirate : public Entity {
 		glm::vec3 offset = glm::mix(start, end, std::min(time_elapsed,1.0f));
 		transformation_matrix[3][0] = 2*offset.x;
 		transformation_matrix[3][2] = 2*offset.z;
+
+
+		if (true) {
+			//transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -6) * dt * (float)speed);
+			if (rl >= 25 || rl <= -25) {
+				leg = !leg;
+			}
+			if (x >= 45 || x <= 0) {
+				hand = !hand;
+			}
+			if (b >= 4 || b <= -4) {
+				body = !body;
+			}
+
+			if (hand == true) {
+				x = x + dt * 32;
+				y = y + dt * 1;
+			}
+			else {
+				x = x - dt * 32;
+				y = y - dt * 1;
+			}
+
+			if (leg == true) {
+				rl = rl + dt * 32;
+				fl = fl + dt * 1;
+			}
+			else {
+				rl = rl - dt * 32;
+				fl = fl - dt * 1;
+			}
+
+			if (body == true) {
+				b = b + dt * 8;
+			}
+			else {
+				b = b - dt * 8;
+			}
+
+		}
 	}
-	~Pirate() {
-	//	pirates.erase(this);
+
+	void Render(ShaderProgram& shader) {
+		if (!active)return;
+	
+		glBindVertexArray(geometry->m_vao);
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::rotate(transformation_matrix,glm::radians(b),glm::vec3(0,0,1))));
+		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
+		for (int j = 0; j < geometry->parts.size(); j++)
+		{
+			glm::vec3 diffuseColor = geometry->parts[j].diffuseColor;
+			glm::vec3 specularColor = geometry->parts[j].specularColor;
+			float shininess = geometry->parts[j].shininess;
+
+			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+			glUniform1f(shader["uniform_shininess"], shininess);
+			glUniform1f(shader["uniform_has_texture"], (geometry->parts[j].textureID > 0) ? 1.0f : 0.0f);
+			glBindTexture(GL_TEXTURE_2D, geometry->parts[j].textureID);
+
+			glDrawArrays(GL_TRIANGLES, geometry->parts[j].start_offset, geometry->parts[j].count);
+		}
+
+
+
+		
+		glBindVertexArray(geometry_arm->m_vao);
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::translate(transformation_matrix, glm::vec3(5, 10.5+y,-y))*glm::rotate(glm::mat4(1.0f),glm::radians(x),glm::vec3(vx,vy,vz))));
+		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
+		for (int j = 0; j < geometry_arm->parts.size(); j++)
+		{
+			glm::vec3 diffuseColor = geometry_arm->parts[j].diffuseColor;
+			glm::vec3 specularColor = geometry_arm->parts[j].specularColor;
+			float shininess = geometry_arm->parts[j].shininess;
+
+			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+			glUniform1f(shader["uniform_shininess"], shininess);
+			glUniform1f(shader["uniform_has_texture"], (geometry_arm->parts[j].textureID > 0) ? 1.0f : 0.0f);
+			glBindTexture(GL_TEXTURE_2D, geometry_arm->parts[j].textureID);
+
+			glDrawArrays(GL_TRIANGLES, geometry_arm->parts[j].start_offset, geometry_arm->parts[j].count);
+		}
+
+		
+
+
+		glBindVertexArray(geometry_lleg->m_vao);
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr((glm::translate(transformation_matrix, glm::vec3(-4, 1+fl/2, -3+fl))) * glm::rotate(glm::mat4(1.0f), glm::radians(-rl), glm::vec3(vx, vy, vz))));
+		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
+		for (int j = 0; j < geometry_lleg->parts.size(); j++)
+		{
+			glm::vec3 diffuseColor = geometry_lleg->parts[j].diffuseColor;
+			glm::vec3 specularColor = geometry_lleg->parts[j].specularColor;
+			float shininess = geometry_lleg->parts[j].shininess;
+
+			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+			glUniform1f(shader["uniform_shininess"], shininess);
+			glUniform1f(shader["uniform_has_texture"], (geometry_lleg->parts[j].textureID > 0) ? 1.0f : 0.0f);
+			glBindTexture(GL_TEXTURE_2D, geometry_lleg->parts[j].textureID);
+
+			glDrawArrays(GL_TRIANGLES, geometry_lleg->parts[j].start_offset, geometry_lleg->parts[j].count);
+		}
+
+		glBindVertexArray(geometry_rleg->m_vao);
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr((glm::translate(transformation_matrix, glm::vec3(2.5, 1-fl/2, -3-fl))) * glm::rotate(glm::mat4(1.0f), glm::radians(rl), glm::vec3(vx, vy, vz))));
+		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
+		for (int j = 0; j < geometry_rleg->parts.size(); j++)
+		{
+			glm::vec3 diffuseColor = geometry_rleg->parts[j].diffuseColor;
+			glm::vec3 specularColor = geometry_rleg->parts[j].specularColor;
+			float shininess = geometry_rleg->parts[j].shininess;
+
+			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+			glUniform1f(shader["uniform_shininess"], shininess);
+			glUniform1f(shader["uniform_has_texture"], (geometry_rleg->parts[j].textureID > 0) ? 1.0f : 0.0f);
+			glBindTexture(GL_TEXTURE_2D, geometry_rleg->parts[j].textureID);
+			glDrawArrays(GL_TRIANGLES, geometry_rleg->parts[j].start_offset, geometry_rleg->parts[j].count);
+		}
+
 	}
 };
 
@@ -138,7 +284,7 @@ struct CannonBall : public Entity {
 				if (p == NULL)continue;
 				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (int)p) { //HUGE bottleneck
 					last_pirate_to_collide = (int)p;
-					std::cout << "Collision!!" << std::endl;
+					//std::cout << "Collision!!" << std::endl;
 					p->life--;
 				}
 		}

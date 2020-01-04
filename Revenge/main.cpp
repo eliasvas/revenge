@@ -109,7 +109,7 @@ if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0) 
 	renderer = new Renderer();
 	bool engine_initialized = renderer->Init(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	music = Mix_LoadMUS( "C:/Users/user/Desktop/Revenge/Data/Sounds/background_music.wav" );
+	music = Mix_LoadMUS( "../Data/Sounds/pvz.mp3");
 	if (music == nullptr)return 666;
 	//atexit(func);
 
@@ -150,6 +150,7 @@ int main(int argc, char *argv[])
 
 	auto simulation_start = chrono::steady_clock::now();
 	Mix_PlayMusic(music,-1);
+	//printf("Mix_PlayMusic: %s\n", Mix_GetError());
 	// Wait for user exit
 	while (quit == false)
 	{

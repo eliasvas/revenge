@@ -33,6 +33,7 @@ Entity* tile = NULL;
 Entity* cannonball = NULL;
 Entity* chest = NULL;
 Timed_Spawner* t;
+Pirate* p1;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -304,15 +305,47 @@ bool Renderer::InitGeometricMeshes()
 	}
 	treasure_transformation_matrix = glm::scale(treasure_transformation_matrix,glm::vec3(0.05));
 	treasure_transformation_matrix = glm::translate(treasure_transformation_matrix, glm::vec3(240,0,0));
+	
+	mesh = nullptr;
+	mesh = loader.load("../Data/Pirate/pirate_arm.obj");
+	if (mesh != nullptr) {
+		hand = new GeometryNode();
+		hand->Init(mesh);
+	}
+
+	mesh = nullptr;
+	mesh = loader.load("../Data/Pirate/pirate_left_foot.obj");
+	if (mesh != nullptr) {
+		left_foot = new GeometryNode();
+		left_foot->Init(mesh);
+	}
+
+	mesh = nullptr;
+	mesh = loader.load("../Data/Pirate/pirate_right_foot.obj");
+	if (mesh != nullptr) {
+		right_foot = new GeometryNode();
+		right_foot->Init(mesh);
+	}
+
+	mesh = nullptr;
+	mesh = loader.load("../Data/Pirate/pirate_body.obj");
+	if (mesh != nullptr) {
+		body = new GeometryNode();
+		body->Init(mesh);
+	}
 
 
-	skeleton_no_anim = new Pirate(skeleton,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
+
+
+	skeleton_no_anim = new Pirate(body, hand, left_foot, right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
 	skeleton_no_anim->active = false;
 	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
 	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure");
-	
+	p1 = new Pirate(body, hand, left_foot,right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
+	p1->active = false;
 
-	t = new Timed_Spawner(10.0f, 2, 1.0f,(Pirate*)skeleton_no_anim);
+
+	t = new Timed_Spawner(10.0f, 2, 1.0f,(Pirate*)p1); //change to size of horde
 
 	std::vector<std::string> faces = {
 		"../Data/Various/ame_nebula/purplenebula_rt.tga",
@@ -323,7 +356,6 @@ bool Renderer::InitGeometricMeshes()
 		"../Data/Various/ame_nebula/purplenebula_ft.tga"
 	};
 	skybox = new Skybox(faces);
-
 	return initialized;
 }
 
@@ -473,7 +505,6 @@ void Renderer::RenderGeometry()
 
 
 
-
 	// unbind the vao
 	glBindVertexArray(0);
 	// unbind the shader program
@@ -552,7 +583,7 @@ void FindPath(std::vector<glm::vec3>& path_arr, int* arr, int width, int height)
 	}
 }
 void Renderer::SpawnPirate() {
-	Entity* skeleton_no_anim = new Pirate(skeleton, skeleton_transformation_matrix, skeleton_transformation_normal_matrix, new CircleCollider(1.0f, glm::vec3(0, 0.5, 0)), "pirate", path);
+	Entity* skeleton_no_anim = new Pirate(body, hand, left_foot, right_foot, skeleton_transformation_matrix, skeleton_transformation_normal_matrix, new CircleCollider(1.0f, glm::vec3(0, 0.5, 0)), "pirate", path);
 }
 
 

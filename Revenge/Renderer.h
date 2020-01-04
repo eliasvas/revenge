@@ -40,6 +40,10 @@ protected:
 	SpotLightNode m_spotlight_node;
 
 	// Meshes
+	class GeometryNode* left_foot;
+	class GeometryNode* right_foot;
+	class GeometryNode* hand;
+	class GeometryNode* body;
 	class GeometryNode*								treasure;
 	glm::mat4										treasure_transformation_matrix;
 	glm::mat4										treasure_transformation_normal_matrix;

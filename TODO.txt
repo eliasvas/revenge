@@ -1,7 +1,6 @@
-@make a linked list implementation of the movement of the horde
-@make the animation for the skeleton-pirates
-@make path for skeleton pirates
+@make path for skeleton pirates dynamically
 @shadows
 @text rendering --first make a 2D renderer
 @particles
-@animate the skel
+@animation fixes
+@make pirates turning
