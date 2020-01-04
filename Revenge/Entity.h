@@ -82,14 +82,6 @@ struct Pirate : public Entity {
 	float fl = 0;
 	float b = 0;
 	
-	//death animation
-	float dl = 0;
-
-	//vec3
-	float vx = 1;
-	float vy = 0;
-	float vz = 0;
-
 	//limit values
 	bool hand = true;
 	bool leg = true;
@@ -155,7 +147,7 @@ struct Pirate : public Entity {
 				body = !body;
 			}
 
-			if (hand == true) {
+			if (hand) {
 				x = x + dt * 32;
 				y = y + dt * 1;
 			}
@@ -187,7 +179,7 @@ struct Pirate : public Entity {
 		if (!active)return;
 	
 		glBindVertexArray(geometry->m_vao);
-		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::rotate(transformation_matrix,glm::radians(b),glm::vec3(0,0,1))));
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::rotate(transformation_matrix,glm::radians(b),glm::vec3(1,0,0))));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
 		for (int j = 0; j < geometry->parts.size(); j++)
 		{
@@ -208,7 +200,7 @@ struct Pirate : public Entity {
 
 		
 		glBindVertexArray(geometry_arm->m_vao);
-		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::translate(transformation_matrix, glm::vec3(5, 10.5+y,-y))*glm::rotate(glm::mat4(1.0f),glm::radians(x),glm::vec3(vx,vy,vz))));
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::translate(transformation_matrix, glm::vec3(5, 10.5+y,-y))*glm::rotate(glm::mat4(1.0f),glm::radians(x),glm::vec3(1,0,0))));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
 		for (int j = 0; j < geometry_arm->parts.size(); j++)
 		{
@@ -229,7 +221,7 @@ struct Pirate : public Entity {
 
 
 		glBindVertexArray(geometry_lleg->m_vao);
-		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr((glm::translate(transformation_matrix, glm::vec3(-4, 1+fl/2, -3+fl))) * glm::rotate(glm::mat4(1.0f), glm::radians(-rl), glm::vec3(vx, vy, vz))));
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr((glm::translate(transformation_matrix, glm::vec3(-4, 1+fl/2, -3+fl))) * glm::rotate(glm::mat4(1.0f), glm::radians(-rl), glm::vec3(1,0,0))));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
 		for (int j = 0; j < geometry_lleg->parts.size(); j++)
 		{
@@ -247,7 +239,7 @@ struct Pirate : public Entity {
 		}
 
 		glBindVertexArray(geometry_rleg->m_vao);
-		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr((glm::translate(transformation_matrix, glm::vec3(2.5, 1-fl/2, -3-fl))) * glm::rotate(glm::mat4(1.0f), glm::radians(rl), glm::vec3(vx, vy, vz))));
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr((glm::translate(transformation_matrix, glm::vec3(2.5, 1-fl/2, -3-fl))) * glm::rotate(glm::mat4(1.0f), glm::radians(rl), glm::vec3(1,0,0))));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
 		for (int j = 0; j < geometry_rleg->parts.size(); j++)
 		{
