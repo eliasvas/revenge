@@ -13,7 +13,7 @@
 #include "time.h"
 #include "Timed_Spawner.h"
 
-int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
+i32 tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				1, 0, 0, 0 ,0, 0, 1, 1, 1, 1,
 				1, 0, 0, 0 ,0, 0, 0, 0, 0, 1,
 				1, 1, 0, 0 ,0, 0, 0, 1, 1, 1,
@@ -24,17 +24,22 @@ int tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				0, 0, 0, 1 ,1, 1, 1, 0, 0, 0,
 				0, 0, 0, 0 ,0, 0, 0, 0, 0, 0
 			   };
-std::vector<glm::vec2> path = { {0,0},{1,0},{2,0},{3,0},{3,1},{4,1},{5,1},{6,1},{7,1},{7,2}, {7,3}, {8,3}, {8,4}, {8,5}, {8,6}, {7,6}, 
+std::vector<glm::vec2> path2 = { {0,0},{1,0},{2,0},{3,0},{3,1},{4,1},{5,1},{6,1},{7,1},{7,2}, {7,3}, {8,3}, {8,4}, {8,5}, {8,6}, {7,6}, 
 {6,6}, {6,7}, {5,7},{4,7},{3,7}, {3,8},{3,9},{2,9}, {1,9}, {1,8}, {1,7}, {1,6}, {0,6} }; //just a test must be replaced by the real routing function
-int tilemap_width = 10;
-int tilemap_height = 10;
+
+std::vector<glm::vec2> path = { {0,0},{0,1},{0,2},{0,3},{1,3},{1,4},{1,5},{1,6},{1,7},{2,7}, {3,7}, {3,8}, {4,8}, {5,8}, {6,8}, {6,7}, 
+{6,6}, {7,6}, {7,5},{7,4},{7,3}, {8,3},{9,3},{9,2}, {9,1}, {8,1}, {7,1}, {6,1}, {6,0} }; 
+
+std::vector<i32> turn = {0,0,0,0,1,-1,0,0,0,1,0,-1,1,0,0,1,0,0,-1,1,0,0,-1,-1,1,0,0,0,0,0,1};
+i32 tilemap_width = 10;
+i32 tilemap_height = 10;
 Entity* skeleton_no_anim = NULL;
 Entity* tile = NULL;
 Entity* cannonball = NULL;
 Entity* chest = NULL;
 Timed_Spawner* t;
 Pirate* p1;
-float pirates_to_spawn = 1.0f;
+f32 pirates_to_spawn = 1.0f;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -56,7 +61,7 @@ Renderer::~Renderer()
 	delete green_plane;
 }
 
-bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
+bool Renderer::Init(i32 SCREEN_WIDTH, i32 SCREEN_HEIGHT)
 {
 	this->m_screen_width = SCREEN_WIDTH;
 	this->m_screen_height = SCREEN_HEIGHT;
@@ -96,19 +101,19 @@ bool Renderer::Init(int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	}
 	
 	//std::vector<glm::vec2> path = find_path(tilemap, tilemap_width, tilemap_height);
-	//print_vec2_arr(path);
+	//pri32_vec2_arr(path);
 
 	//If everything initialized
 	return techniques_initialization && items_initialization && buffers_initialization;
 }
 
-void Renderer::Update(float dt)
+void Renderer::Update(f32 dt)
 {
-	t->spawn_instances = (int)pirates_to_spawn; //ugly AF
+	t->spawn_instances = (i32)pirates_to_spawn; //ugly AF
 	if (pirates_to_spawn <5.5)
-		pirates_to_spawn += (float)dt / 20;
-	printf("%f\n", pirates_to_spawn);
-	float movement_speed = 2.0f;
+		pirates_to_spawn += (f32)dt / 20;
+	//pri32f("%f\n", pirates_to_spawn);
+	f32 movement_speed = 2.0f;
 	glm::vec3 direction = glm::normalize(m_camera_target_position - m_camera_position);
 
 	m_camera_position += m_camera_movement.x *  movement_speed * direction * dt;
@@ -119,14 +124,14 @@ void Renderer::Update(float dt)
 	m_camera_target_position += m_camera_movement.y * movement_speed * right * dt;
 
 	glm::mat4 rotation = glm::mat4(1.0f);
-	float angular_speed = glm::pi<float>() * 0.0025f;
+	f32 angular_speed = glm::pi<f32>() * 0.0025f;
 	
 	rotation *= glm::rotate(glm::mat4(1.0), m_camera_look_angle_destination.y * angular_speed, right);
 	rotation *= glm::rotate(glm::mat4(1.0), -m_camera_look_angle_destination.x  * angular_speed, m_camera_up_vector);
 	m_camera_look_angle_destination = glm::vec2(0);
 	
 	direction = rotation * glm::vec4(direction, 0);
-	float dist = glm::distance(m_camera_position, m_camera_target_position);
+	f32 dist = glm::distance(m_camera_position, m_camera_target_position);
 	m_camera_target_position = m_camera_position + direction * dist;
 	
 	//IMPORTANT
@@ -137,7 +142,7 @@ void Renderer::Update(float dt)
 	tile->Update(dt);
 	for (auto ball : CannonBall::balls)if (ball!=NULL)ball->Update(dt, speed);
 	for (auto pirate : Pirate::pirates)if (pirate!=NULL)pirate->Update(dt, speed);
-	for (auto tower : Tower::towers)if (tower!=NULL)tower->Update(dt);
+	for (auto tower : Tower::towers)if (tower!=NULL)tower->Update(dt, speed);
 	chest->Update(dt);
 	t->Update(dt);
 	// update meshes tranformations
@@ -218,12 +223,12 @@ bool Renderer::InitIntermediateShaderBuffers()
 	return ResizeBuffers(m_screen_width, m_screen_height);
 }
 
-bool Renderer::ResizeBuffers(int width, int height)
+bool Renderer::ResizeBuffers(i32 width, i32 height)
 {
 	m_screen_width = width;
 	m_screen_height = height;
 
-	m_projection_matrix = glm::perspective(glm::radians(60.f), width / (float)height, 0.1f, 1500.0f);
+	m_projection_matrix = glm::perspective(glm::radians(60.f), width / (f32)height, 0.1f, 1500.0f);
 	m_view_matrix = glm::lookAt(m_camera_position, m_camera_target_position, m_camera_up_vector);
 
 	return true;
@@ -350,7 +355,7 @@ bool Renderer::InitGeometricMeshes()
 	p1->active = false;
 
 
-	t = new Timed_Spawner(10.0f, (int)pirates_to_spawn, 1.0f,(Pirate*)p1); //change to size of horde
+	t = new Timed_Spawner(10.0f, (i32)pirates_to_spawn, 1.0f,(Pirate*)p1); //change to size of horde
 
 	std::vector<std::string> faces = {
 		"../Data/Various/ame_nebula/purplenebula_rt.tga",
@@ -393,7 +398,7 @@ void Renderer::RenderGeometry()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	glEnable(GL_DEPTH_TEST);
 	
-	// render only points, lines, triangles
+	// render only poi32s, lines, triangles
 	switch (m_rendering_mode)
 	{
 	case RENDERING_MODE::TRIANGLES:
@@ -441,8 +446,8 @@ void Renderer::RenderGeometry()
 	//Draw Tiles 
 	glm::mat4 transform = terrain_transformation_matrix;
 	//TODO should be done with glDrawArraysInstanced
-	for (int y = 0; y < tilemap_height; ++y) {
-		for (int x = 0; x < tilemap_width; ++x) {
+	for (i32 y = 0; y < tilemap_height; ++y) {
+		for (i32 x = 0; x < tilemap_width; ++x) {
 			
 			//std::cout << glm::to_string(transform) << std::endl;
 			if (tilemap[x + y*tilemap_height] == 0 || tilemap[x+y*tilemap_height] == 2) { //todo fix
@@ -450,11 +455,11 @@ void Renderer::RenderGeometry()
 				glBindVertexArray(terrain->m_vao);
 				glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transform));
 				glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(terrain_transformation_normal_matrix));
-				for (int j = 0; j < terrain->parts.size(); j++)
+				for (i32 j = 0; j < terrain->parts.size(); j++)
 				{
 					glm::vec3 diffuseColor = terrain->parts[j].diffuseColor;
 					glm::vec3 specularColor = terrain->parts[j].specularColor;
-					float shininess = terrain->parts[j].shininess;
+					f32 shininess = terrain->parts[j].shininess;
 
 					glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 					glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
@@ -470,10 +475,10 @@ void Renderer::RenderGeometry()
 				glBindVertexArray(road->m_vao);
 				glUniformMatrix4fv(m_geometry_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transform));
 				glUniformMatrix4fv(m_geometry_rendering_program["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(road_transformation_normal_matrix));
-				for (int j = 0; j < road->parts.size(); ++j) {
+				for (i32 j = 0; j < road->parts.size(); ++j) {
 					glm::vec3 diffuseColor = road->parts[j].diffuseColor;
 					glm::vec3 specularColor = road->parts[j].specularColor;
-					float shininess = road->parts[j].shininess;
+					f32 shininess = road->parts[j].shininess;
 
 					glUniform3f(m_geometry_rendering_program["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 					glUniform3f(m_geometry_rendering_program["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
@@ -557,14 +562,14 @@ void Renderer::move_green_plane(glm::vec3 mov) {
 }
 
 void Renderer::RemoveTower() {
-	int x = (int)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
-	int y = (int)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
+	i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
+	i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
 	if (tilemap[x + y * tilemap_width]!=2)return;
 	tilemap[x + y * tilemap_width] = 0; //since we are going to make a new tower we are going to prevent further building on the same block
-	for (int i = 0; i < Tower::towers.size(); ++i) {
+	for (i32 i = 0; i < Tower::towers.size(); ++i) {
 		if (Tower::towers[i] == NULL)continue;
-		if (int(Tower::towers[i]->transformation_matrix[3][0]) == (int)(tile->transformation_matrix[3][0])
-			&& (int)(Tower::towers[i]->transformation_matrix[3][2]) == (int)(tile->transformation_matrix[3][2])) { //todo check
+		if (i32(Tower::towers[i]->transformation_matrix[3][0]) == (i32)(tile->transformation_matrix[3][0])
+			&& (i32)(Tower::towers[i]->transformation_matrix[3][2]) == (i32)(tile->transformation_matrix[3][2])) { //todo check
 			delete Tower::towers[i];
 			Tower::towers[i] = NULL;
 		}
@@ -573,16 +578,16 @@ void Renderer::RemoveTower() {
 }
 
 void Renderer::BuildTower() {
-	int x = (int)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
-	int y = (int)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
+	i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
+	i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
 	if (tilemap[x + y * tilemap_width]!=0)return;
 	tilemap[x + y * tilemap_width] = 2; //since we are going to make a new tower we are going to prevent further building on the same block
 	auto t1 = new Tower(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(3, glm::vec3(0,0,0)),"tower", ball);
 	((Treasure*)chest)->money -= 100;
 }
-void FindPath(std::vector<glm::vec3>& path_arr, int* arr, int width, int height) {
-	for (int y = 0; y < tilemap_height; ++y) {
-		for (int x = 0; x < tilemap_width; ++x) {
+void FindPath(std::vector<glm::vec3>& path_arr, i32* arr, i32 width, i32 height) {
+	for (i32 y = 0; y < tilemap_height; ++y) {
+		for (i32 x = 0; x < tilemap_width; ++x) {
 			//do something
 		}
 	}

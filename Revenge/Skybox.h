@@ -4,6 +4,7 @@
 #include "ShaderProgram.h"
 #include "glm/glm.hpp"
 #include <iostream>
+#include "Tools.h"
 #include "GLEW/glew.h"
 #include "glm/gtc/type_ptr.hpp"
 #include <vector>
@@ -11,11 +12,11 @@
 #include "SDL2/SDL_timer.h"
 
 
-unsigned int loadCubemap(std::vector<std::string> faces);
+u32 loadCubemap(std::vector<std::string> faces);
 struct Skybox {
 	Skybox(const std::vector<std::string>& faces) {
         load_skybox(faces);
-		float skyboxVertices[] = {
+		f32 skyboxVertices[] = {
 			// positions          
 			-1.0f,  1.0f, -1.0f,
 			-1.0f, -1.0f, -1.0f,
@@ -65,7 +66,7 @@ struct Skybox {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);	
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(f32), (void*)0);	
     }
 
 	void load_skybox(const std::vector<std::string>& faces) {
@@ -89,9 +90,9 @@ struct Skybox {
         glDepthMask(GL_TRUE);
 	}
 
-	unsigned int VAO;
-	unsigned int VBO;
-    unsigned int tex_id;
+	u32 VAO;
+	u32 VBO;
+    u32 tex_id;
     std::vector<std::string> faces;
     glm::mat4 projection;
     glm::mat4 view;

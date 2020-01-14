@@ -1,4 +1,5 @@
 #pragma once
+#include "Tools.h"
 #include <vector>
 #include <string>
 #include "ShaderProgram.h"
@@ -7,6 +8,7 @@
 #include "GeometryNode.h"
 #include "glm/glm.hpp"
 #include "GLEW/glew.h"
+#include "glm/gtx/vector_angle.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "CircleCollider.h"
 #include "OBJLoader.h"
@@ -17,6 +19,7 @@
 #include "algorithm"
 #include "tgmath.h"
 
+typedef int32_t i32;
 struct Entity {
 	CircleCollider* col;
 	GeometryNode*								geometry;
@@ -40,11 +43,11 @@ struct Entity {
 		glBindVertexArray(geometry->m_vao);
 		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_matrix));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
-		for (int j = 0; j < geometry->parts.size(); j++)
+		for (i32 j = 0; j < geometry->parts.size(); j++)
 		{
 			glm::vec3 diffuseColor = geometry->parts[j].diffuseColor;
 			glm::vec3 specularColor = geometry->parts[j].specularColor;
-			float shininess = geometry->parts[j].shininess;
+			f32 shininess = geometry->parts[j].shininess;
 
 			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
@@ -56,7 +59,7 @@ struct Entity {
 		}
 
 	}
-	virtual void Update(float dt, int speed = 1.0f) {};
+	virtual void Update(f32 dt, i32 speed = 1.0f) {};
 	~Entity() {
 	}
 };
@@ -68,19 +71,20 @@ struct Pirate : public Entity {
 	GeometryNode* geometry_lleg;
 	GeometryNode* geometry_rleg;
 	std::vector<glm::vec2> path;
-	float time = 0.0f;	
-	float time_elapsed = 0.0f;
-	int tile = 0;
-	int life = 2;
+	f32 time = 0.0f;	
+	f32 time_elapsed = 0.0f;
+	i32 tile = 0;
+	i32 life = 2;
+	
 
 
 	//walking animation 
 
-	float x = 0;
-	float y = 0;
-	float rl = 0;
-	float fl = 0;
-	float b = 0;
+	f32 x = 0;
+	f32 y = 0;
+	f32 rl = 0;
+	f32 fl = 0;
+	f32 b = 0;
 	
 	//limit values
 	bool hand = true;
@@ -97,32 +101,34 @@ struct Pirate : public Entity {
 		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, -2, 0));
 		pirates.push_back(this);
 	}
-	void Update(float dt, int speed = 1) {
+	void Update(f32 dt, i32 speed = 1) {
 		if (!active)return;
 		time += dt;
-		if (life < 0) {
+		if (life <= 0) {
 			active = false;//must destroy but wtv
 			
 		}
 		time_elapsed += dt;
-		if (time_elapsed > (float)speed) {
-			//std::cout << "next tile" << std::endl;
+		//if tile i32erpolation is over
+		if (time_elapsed > (f32)speed) {
 			time_elapsed = 0.0f;
-			transformation_matrix[3][0] = 2*path[tile+1].g;
-			transformation_matrix[3][2] = 2*path[tile+1].r;
 			tile++;
-			if (tile < path.size() - 1 && false) {
-				//atan2(direction.y, -direction.x)
-				float angle = atan2(path[tile+1].g - path[tile].g, path[tile].r - path[tile+1].r) + glm::radians(90.0f);
-				transformation_matrix = glm::rotate(transformation_matrix,angle, glm::vec3(0, 1, 0));
+
+
+			if (tile != 0 && tile < path.size() - 1) {
+				glm::vec3 prev_direction = glm::vec3(path[tile].g,0,path[tile].r) - glm::vec3(path[tile - 1].g,0,path[tile-1].r);
+				glm::vec3 current_direction = glm::vec3(path[tile+1].g,0,path[tile+1].r) - glm::vec3(path[tile].g,0,path[tile].r);
+				
 			}
 		}
-		glm::vec3 start = glm::vec3(path[tile].g, 0, path[tile].r);
-		glm::vec3 end;
-		if (tile < path.size() - 1 && active) //omg
-			end = glm::vec3(path[tile + 1].g, 0, path[tile + 1].r);
-		else {
-			for (int i = 0; i < pirates.size(); ++i) {
+		if (tile < path.size() - 1 && active) {
+			glm::vec3 start = glm::vec3(path[tile].r, 0, path[tile].g);
+			glm::vec3 end = glm::vec3(path[tile + 1].r, 0, path[tile + 1].g);
+			glm::vec3 offset = glm::mix(start, end, std::min(time_elapsed, 1.0f));
+			transformation_matrix[3][0] = 2 * offset.x;
+			transformation_matrix[3][2] = 2 * offset.z;
+		}else {
+			for (i32 i = 0; i < pirates.size(); ++i) {
 				if (pirates[i] == this) {
 					delete pirates[i];
 					pirates[i] = NULL;
@@ -130,20 +136,17 @@ struct Pirate : public Entity {
 			}
 
 		}
-		glm::vec3 offset = glm::mix(start, end, std::min(time_elapsed,1.0f));
-		transformation_matrix[3][0] = 2*offset.x;
-		transformation_matrix[3][2] = 2*offset.z;
-
+	
 
 		if (true) {
-			//transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -6) * dt * (float)speed);
+			//transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -6) * dt * (f32)speed);
 			if (rl >= 25 || rl <= -25) {
 				leg = !leg;
 			}
 			if (x >= 45 || x <= 0) {
 				hand = !hand;
 			}
-			if (b >= 4 || b <= -4) {
+			if (b >= 5 || b <= -5) {
 				body = !body;
 			}
 
@@ -166,10 +169,10 @@ struct Pirate : public Entity {
 			}
 
 			if (body == true) {
-				b = b + dt * 8;
+				b = b + dt * 16;
 			}
 			else {
-				b = b - dt * 8;
+				b = b - dt * 16;
 			}
 
 		}
@@ -179,13 +182,13 @@ struct Pirate : public Entity {
 		if (!active)return;
 	
 		glBindVertexArray(geometry->m_vao);
-		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::rotate(transformation_matrix,glm::radians(b),glm::vec3(1,0,0))));
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::rotate(transformation_matrix,glm::radians(b),glm::vec3(0,0,1))));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
-		for (int j = 0; j < geometry->parts.size(); j++)
+		for (i32 j = 0; j < geometry->parts.size(); j++)
 		{
 			glm::vec3 diffuseColor = geometry->parts[j].diffuseColor;
 			glm::vec3 specularColor = geometry->parts[j].specularColor;
-			float shininess = geometry->parts[j].shininess;
+			f32 shininess = geometry->parts[j].shininess;
 
 			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
@@ -202,11 +205,11 @@ struct Pirate : public Entity {
 		glBindVertexArray(geometry_arm->m_vao);
 		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::translate(transformation_matrix, glm::vec3(5, 10.5+y,-y))*glm::rotate(glm::mat4(1.0f),glm::radians(x),glm::vec3(1,0,0))));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
-		for (int j = 0; j < geometry_arm->parts.size(); j++)
+		for (i32 j = 0; j < geometry_arm->parts.size(); j++)
 		{
 			glm::vec3 diffuseColor = geometry_arm->parts[j].diffuseColor;
 			glm::vec3 specularColor = geometry_arm->parts[j].specularColor;
-			float shininess = geometry_arm->parts[j].shininess;
+			f32 shininess = geometry_arm->parts[j].shininess;
 
 			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
@@ -223,11 +226,11 @@ struct Pirate : public Entity {
 		glBindVertexArray(geometry_lleg->m_vao);
 		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr((glm::translate(transformation_matrix, glm::vec3(-4, 1+fl/2, -3+fl))) * glm::rotate(glm::mat4(1.0f), glm::radians(-rl), glm::vec3(1,0,0))));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
-		for (int j = 0; j < geometry_lleg->parts.size(); j++)
+		for (i32 j = 0; j < geometry_lleg->parts.size(); j++)
 		{
 			glm::vec3 diffuseColor = geometry_lleg->parts[j].diffuseColor;
 			glm::vec3 specularColor = geometry_lleg->parts[j].specularColor;
-			float shininess = geometry_lleg->parts[j].shininess;
+			f32 shininess = geometry_lleg->parts[j].shininess;
 
 			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
@@ -241,11 +244,11 @@ struct Pirate : public Entity {
 		glBindVertexArray(geometry_rleg->m_vao);
 		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr((glm::translate(transformation_matrix, glm::vec3(2.5, 1-fl/2, -3-fl))) * glm::rotate(glm::mat4(1.0f), glm::radians(rl), glm::vec3(1,0,0))));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
-		for (int j = 0; j < geometry_rleg->parts.size(); j++)
+		for (i32 j = 0; j < geometry_rleg->parts.size(); j++)
 		{
 			glm::vec3 diffuseColor = geometry_rleg->parts[j].diffuseColor;
 			glm::vec3 specularColor = geometry_rleg->parts[j].specularColor;
-			float shininess = geometry_rleg->parts[j].shininess;
+			f32 shininess = geometry_rleg->parts[j].shininess;
 
 			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
@@ -262,27 +265,27 @@ struct CannonBall : public Entity {
 	static std::vector<CannonBall*> balls;
 	glm::vec3 down = {0.0f, -1.5f, 0.0f};
 	glm::vec3 dir;
-	int last_pirate_to_collide = 0;
-	float active_time; //todo implement logic
+	i32 last_pirate_to_collide = 0;
+	f32 active_time; //todo implement logic
 	CannonBall(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, glm::vec3 dir,CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag), dir(dir) {
 		CannonBall::balls.push_back(this);
 	}
-	void Update(float dt,int speed = 1) {
+	void Update(f32 dt,i32 speed = 1) {
 		if (!active)return;
-		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(float)speed*30.0f); //find a true relation in terms of speed
-		transformation_matrix = glm::translate(transformation_matrix, down*dt*(float)speed*30.0f);
+		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(f32)speed*30.0f); //find a true relation in terms of speed
+		transformation_matrix = glm::translate(transformation_matrix, down*dt*(f32)speed*30.0f);
 
 		for (Pirate* p : Pirate::pirates) {
 				if (p == NULL)continue;
-				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (int)p) { //HUGE bottleneck
-					last_pirate_to_collide = (int)p;
+				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (i32)p) { //HUGE bottleneck
+					last_pirate_to_collide = (i32)p;
 					//std::cout << "Collision!!" << std::endl;
 					p->life--;
 				}
 		}
 
-		if (transformation_matrix[3][1] < -1) {
-			for (int i = 0; i < balls.size(); ++i) {
+		if (transformation_matrix[3][1] < -2) {
+			for (i32 i = 0; i < balls.size(); ++i) {
 				if (balls[i] == this) {
 					delete balls[i];
 					balls[i] = NULL;
@@ -298,14 +301,14 @@ struct CannonBall : public Entity {
 
 struct Tower : public Entity {
 	static std::vector<Tower*> towers;
-	float rate;
+	f32 rate;
 	GeometryNode* ball_mesh;
 	Tower(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag, GeometryNode* b_m) : Entity(geometry, transform, normal, col, tag) {
 		rate = 0.0f;
 		ball_mesh = b_m;
 		towers.push_back(this);
 	}
-	void Update(float dt, int speed = 1) {
+	void Update(f32 dt, i32 speed = 1) {
 		if (!active)return;
 		rate -= dt;
 		//std::cout << towers.size()<< std::endl;
@@ -325,21 +328,21 @@ struct Tower : public Entity {
 };
 
 struct Treasure : public Entity {
-	int last_pirate_to_collide = 0;
-	int money = 1000;
+	i32 last_pirate_to_collide = 0;
+	i32 money = 1000;
 	Treasure(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag) : Entity(geometry, transform, normal, col, tag) {
 	}
-	void Update(float dt, int speed = 1) {
-		//printf("%i\n", money);
+	void Update(f32 dt, i32 speed = 1) {
+		//pri32f("%i\n", money);
 		if (money <= 0) {
 			printf("Game Over!");
 			exit(0);
 		}
 		for (Pirate* p : Pirate::pirates) {
 				if (p == NULL)continue;
-				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (int)p) { //HUGE bottleneck
+				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (i32)p) { //HUGE bottleneck
 					money -= 100;
-					last_pirate_to_collide = (int)p;
+					last_pirate_to_collide = (i32)p;
 				}
 		}
 	}

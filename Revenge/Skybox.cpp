@@ -5,15 +5,16 @@
 #include "SDL2/SDL_timer.h"
 #include "stb_image.h"
 #include <iostream>
-unsigned int loadCubemap(std::vector<std::string> faces)
+#include "Tools.h"
+u32 loadCubemap(std::vector<std::string> faces)
 {
-    unsigned int textureID;
+    u32 textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
     //stbi_set_flip_vertically_on_load(true);
-    int width, height, nrChannels;
-    for (unsigned int i = 0; i < faces.size(); i++)
+    i32 width, height, nrChannels;
+    for (u32 i = 0; i < faces.size(); i++)
     {
         unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
         if (data)
