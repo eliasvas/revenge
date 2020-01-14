@@ -19,6 +19,13 @@
 #include "algorithm"
 #include "tgmath.h"
 
+enum {
+	UP = 0,
+	LEFT,
+	DOWN,
+	RIGHT,
+};
+
 typedef int32_t i32;
 struct Entity {
 	CircleCollider* col;
@@ -70,12 +77,12 @@ struct Pirate : public Entity {
 	GeometryNode* geometry_arm;
 	GeometryNode* geometry_lleg;
 	GeometryNode* geometry_rleg;
+	i32 facing_direction = 0;
 	std::vector<glm::vec2> path;
 	f32 time = 0.0f;	
 	f32 time_elapsed = 0.0f;
 	i32 tile = 0;
 	i32 life = 2;
-	
 
 
 	//walking animation 
@@ -114,11 +121,18 @@ struct Pirate : public Entity {
 			time_elapsed = 0.0f;
 			tile++;
 
-
 			if (tile != 0 && tile < path.size() - 1) {
-				glm::vec3 prev_direction = glm::vec3(path[tile].g,0,path[tile].r) - glm::vec3(path[tile - 1].g,0,path[tile-1].r);
-				glm::vec3 current_direction = glm::vec3(path[tile+1].g,0,path[tile+1].r) - glm::vec3(path[tile].g,0,path[tile].r);
-				
+				//turning is handled at rendering
+				glm::vec3 current_direction = glm::vec3(path[tile+1].r,0,path[tile+1].g) - glm::vec3(path[tile].r,0,path[tile].g);
+				if (std::abs(current_direction.z - 1.f) < 0.1f)
+					facing_direction = UP;
+				else if (current_direction.z < -1.f * 0.1f)
+					facing_direction = DOWN;
+				else if (current_direction.x < -1.f * 0.1f)
+					facing_direction = RIGHT;
+				else
+					facing_direction = LEFT;
+
 			}
 		}
 		if (tile < path.size() - 1 && active) {
@@ -180,7 +194,7 @@ struct Pirate : public Entity {
 
 	void Render(ShaderProgram& shader) {
 		if (!active)return;
-	
+		transformation_matrix = glm::rotate(transformation_matrix,facing_direction*((f32)M_PI/2), glm::vec3(0,1,0));
 		glBindVertexArray(geometry->m_vao);
 		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::rotate(transformation_matrix,glm::radians(b),glm::vec3(0,0,1))));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
@@ -258,6 +272,7 @@ struct Pirate : public Entity {
 			glDrawArrays(GL_TRIANGLES, geometry_rleg->parts[j].start_offset, geometry_rleg->parts[j].count);
 		}
 
+		transformation_matrix = glm::rotate(transformation_matrix,(-1.f)*facing_direction*((f32)M_PI/2), glm::vec3(0,1,0));
 	}
 };
 
