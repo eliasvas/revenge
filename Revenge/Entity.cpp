@@ -5,6 +5,7 @@
 
 
 std::vector<CannonBall*> CannonBall::balls;
+std::vector<Meteor*> Meteor::meteors;
 std::vector<Pirate*> Pirate::pirates;
 std::vector<Tower*> Tower::towers;
 

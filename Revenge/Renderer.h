@@ -75,6 +75,7 @@ protected:
 	bool InitGeometricMeshes();
 
 	ShaderProgram								m_geometry_rendering_program;
+	ShaderProgram								m_tower_rendering_program;
 	ShaderProgram								skybox_rendering_program;
 
 	ParticleEmitter								m_particle_emitter;
@@ -108,6 +109,7 @@ public:
 	void BuildTower();
 	void RemoveTower();
 	void SpawnPirate();
+	void SpawnMeteor();
 };
 
 #endif

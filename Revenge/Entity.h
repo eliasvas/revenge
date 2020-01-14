@@ -26,7 +26,6 @@ enum {
 	RIGHT,
 };
 
-typedef int32_t i32;
 struct Entity {
 	CircleCollider* col;
 	GeometryNode*								geometry;
@@ -59,6 +58,7 @@ struct Entity {
 			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
 			glUniform1f(shader["uniform_shininess"], shininess);
+			glUniform1f(shader["fade_alpha"], 1.0f);
 			glUniform1f(shader["uniform_has_texture"], (geometry->parts[j].textureID > 0) ? 1.0f : 0.0f);
 			glBindTexture(GL_TEXTURE_2D, geometry->parts[j].textureID);
 
@@ -111,12 +111,8 @@ struct Pirate : public Entity {
 	void Update(f32 dt, i32 speed = 1) {
 		if (!active)return;
 		time += dt;
-		if (life <= 0) {
-			active = false;//must destroy but wtv
-			
-		}
+		if (life <= 0)active = false;//must destroy but wtv
 		time_elapsed += dt;
-		//if tile i32erpolation is over
 		if (time_elapsed > (f32)speed) {
 			time_elapsed = 0.0f;
 			tile++;
@@ -313,20 +309,57 @@ struct CannonBall : public Entity {
 	}
 
 };
+struct Meteor : public Entity {
+	static std::vector<Meteor*> meteors;
+	glm::vec3 down = {0.0f, -1.5f, 0.0f};
+	glm::vec3 dir;
+	i32 last_pirate_to_collide = 0;
+	f32 active_time; //todo implement logic
+	Meteor(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, glm::vec3 dir,CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag), dir(dir) {
+		Meteor::meteors.push_back(this);
+	}
+	void Update(f32 dt,i32 speed = 1) {
+		if (!active)return;
+		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(f32)speed*30.0f); //find a true relation in terms of speed
+
+		for (Pirate* p : Pirate::pirates) {
+				if (p == NULL)continue;
+				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (i32)p) { //HUGE bottleneck
+					last_pirate_to_collide = (i32)p;
+					//std::cout << "Collision!!" << std::endl;
+					p->life= 0;
+				}
+		}
+
+		if (transformation_matrix[3][1] < -2) {
+			for (i32 i = 0; i < meteors.size(); ++i) {
+				if (meteors[i] == this) {
+					delete meteors[i];
+					meteors[i] = NULL;
+				}
+			}
+		}
+	}
+	~Meteor() {
+//		balls.erase(this);
+	}
+
+};
 
 struct Tower : public Entity {
 	static std::vector<Tower*> towers;
 	f32 rate;
 	GeometryNode* ball_mesh;
+	f32 local_time = 0.0f;
 	Tower(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag, GeometryNode* b_m) : Entity(geometry, transform, normal, col, tag) {
 		rate = 0.0f;
 		ball_mesh = b_m;
 		towers.push_back(this);
 	}
 	void Update(f32 dt, i32 speed = 1) {
-		if (!active)return;
+		local_time += dt;
+		if (!active|| local_time < 1.0f)return;
 		rate -= dt;
-		//std::cout << towers.size()<< std::endl;
 		for (Pirate* p : Pirate::pirates) {
 				if (p == NULL)continue;
 				if (CheckCollision(this, (Entity*)p) && rate < 0&& p->active) { //HUGE bottleneck
@@ -338,6 +371,30 @@ struct Tower : public Entity {
 				}
 		}
 	}
+	void Render(ShaderProgram& shader) {
+		if (!active)return;
+		//if (transformation_matrix[3][2] < 0)return; //MUST REMOVE
+		glBindVertexArray(geometry->m_vao);
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_matrix));
+		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
+		for (i32 j = 0; j < geometry->parts.size(); j++)
+		{
+			glm::vec3 diffuseColor = geometry->parts[j].diffuseColor;
+			glm::vec3 specularColor = geometry->parts[j].specularColor;
+			f32 shininess = geometry->parts[j].shininess;
+
+			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+			glUniform1f(shader["uniform_shininess"], shininess);
+			glUniform1f(shader["fade_alpha"], std::min(1.0f, local_time));
+			glUniform1f(shader["uniform_has_texture"], (geometry->parts[j].textureID > 0) ? 1.0f : 0.0f);
+			glBindTexture(GL_TEXTURE_2D, geometry->parts[j].textureID);
+
+			glDrawArrays(GL_TRIANGLES, geometry->parts[j].start_offset, geometry->parts[j].count);
+		}
+
+	}
+
 	~Tower() {
 	}
 };

@@ -233,7 +233,10 @@ int main(int argc, char *argv[])
 				}
 				else if (event.key.keysym.sym == SDLK_c) {
 					renderer->SpawnPirate();
+				}else if (event.key.keysym.sym == SDLK_n) {
+					renderer->SpawnMeteor();
 				}
+
 
 			}
 			else if (event.type == SDL_MOUSEMOTION&& show_options == false)

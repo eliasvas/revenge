@@ -1,6 +1,7 @@
 #version 330 core
 layout(location = 0) out vec4 out_color;
 
+
 uniform vec3 uniform_diffuse;
 uniform vec3 uniform_specular;
 uniform float uniform_shininess;
@@ -74,6 +75,6 @@ void main(void)
 	float specularNormalization = (uniform_shininess + 8) / (8 * PI);
 	vec3 specularReflection = (NdotL > 0.0)? irradiance * specularNormalization * uniform_specular * pow( NdotH, uniform_shininess + 0.001) : vec3(0);
 	
-	out_color = vec4( diffuseReflection + specularReflection, texture(diffuse_texture, f_texcoord).a);	
+	out_color = vec4( diffuseReflection + specularReflection, texture(diffuse_texture, f_texcoord).a);
 }
 

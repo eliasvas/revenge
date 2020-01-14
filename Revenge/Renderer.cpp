@@ -143,6 +143,7 @@ void Renderer::Update(f32 dt)
 	for (auto ball : CannonBall::balls)if (ball!=NULL)ball->Update(dt, speed);
 	for (auto pirate : Pirate::pirates)if (pirate!=NULL)pirate->Update(dt, speed);
 	for (auto tower : Tower::towers)if (tower!=NULL)tower->Update(dt, speed);
+	for (auto m : Meteor::meteors)if(m!=NULL)m->Update(dt,speed);
 	chest->Update(dt);
 	t->Update(dt);
 	// update meshes tranformations
@@ -184,6 +185,30 @@ bool Renderer::InitRenderingTechniques()
 	m_geometry_rendering_program.LoadUniform("uniform_light_color");
 	m_geometry_rendering_program.LoadUniform("uniform_light_umbra");
 	m_geometry_rendering_program.LoadUniform("uniform_light_penumbra");
+
+	vertex_shader_path = "../Data/Shaders/basic_rendering.vert";
+	fragment_shader_path = "../Data/Shaders/tower_rendering.frag";
+	m_tower_rendering_program.LoadVertexShaderFromFile(vertex_shader_path.c_str());
+	m_tower_rendering_program.LoadFragmentShaderFromFile(fragment_shader_path.c_str());
+	m_tower_rendering_program.CreateProgram();
+	m_tower_rendering_program.LoadUniform("uniform_projection_matrix");
+	m_tower_rendering_program.LoadUniform("uniform_view_matrix");
+	m_tower_rendering_program.LoadUniform("uniform_model_matrix");
+	m_tower_rendering_program.LoadUniform("uniform_normal_matrix");
+	m_tower_rendering_program.LoadUniform("uniform_diffuse");
+	m_tower_rendering_program.LoadUniform("uniform_specular");
+	m_tower_rendering_program.LoadUniform("uniform_shininess");
+	m_tower_rendering_program.LoadUniform("uniform_has_texture");
+	m_tower_rendering_program.LoadUniform("diffuse_texture");
+	m_tower_rendering_program.LoadUniform("uniform_camera_position");
+	m_tower_rendering_program.LoadUniform("fade_alpha");
+	// Light Source Uniforms
+	m_tower_rendering_program.LoadUniform("uniform_light_position");
+	m_tower_rendering_program.LoadUniform("uniform_light_direction");
+	m_tower_rendering_program.LoadUniform("uniform_light_color");
+	m_tower_rendering_program.LoadUniform("uniform_light_umbra");
+	m_tower_rendering_program.LoadUniform("uniform_light_penumbra");
+
 
 	// Create and Compile Particle Shader
 	vertex_shader_path = "../Data/Shaders/particle_rendering.vert";
@@ -383,7 +408,7 @@ void Renderer::Render()
 	GLenum error = Tools::CheckGLError();
 	if (error != GL_NO_ERROR)
 	{
-		printf("Reanderer:Draw GL Error\n");
+		printf("Reanderer:Draw GL Error%d\n", error);
 		system("pause");
 	}
 }
@@ -504,6 +529,7 @@ void Renderer::RenderGeometry()
 	for (auto t : Tower::towers)if(t!=NULL)t->Render(m_geometry_rendering_program);
 	for (auto p : Pirate::pirates)if(p!=NULL)p->Render(m_geometry_rendering_program);
 	for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
+	for (auto m : Meteor::meteors)if(m!=NULL)m->Render(m_geometry_rendering_program);
 	//for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 	chest->Render(m_geometry_rendering_program);
 
@@ -585,6 +611,15 @@ void Renderer::BuildTower() {
 	auto t1 = new Tower(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(3, glm::vec3(0,0,0)),"tower", ball);
 	((Treasure*)chest)->money -= 100;
 }
+void Renderer::SpawnMeteor() {
+	i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
+	i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
+	if (tilemap[x + y * tilemap_width] != 1)return;
+	CircleCollider* c= new CircleCollider(0.5f, glm::vec3(0, 0, 0));
+	auto m = new Meteor(ball,glm::scale(glm::translate(tile->transformation_matrix,glm::vec3(0,30,0)), glm::vec3(0.7,0.7,0.7)),tile->transformation_normal_matrix,glm::vec3(0,-1,0),c,"meteor");
+	((Treasure*)chest)->money -= 200;
+}
+
 void FindPath(std::vector<glm::vec3>& path_arr, i32* arr, i32 width, i32 height) {
 	for (i32 y = 0; y < tilemap_height; ++y) {
 		for (i32 x = 0; x < tilemap_width; ++x) {
