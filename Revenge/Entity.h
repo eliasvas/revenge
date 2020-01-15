@@ -351,9 +351,11 @@ struct Tower : public Entity {
 	f32 rate;
 	GeometryNode* ball_mesh;
 	f32 local_time = 0.0f;
+	glm::vec3 color;
 	Tower(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag, GeometryNode* b_m) : Entity(geometry, transform, normal, col, tag) {
 		rate = 0.0f;
 		ball_mesh = b_m;
+		color = glm::vec3(0.5f);
 		towers.push_back(this);
 	}
 	void Update(f32 dt, i32 speed = 1) {
@@ -386,7 +388,8 @@ struct Tower : public Entity {
 			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
 			glUniform1f(shader["uniform_shininess"], shininess);
-			glUniform1f(shader["fade_alpha"], std::min(1.0f, local_time));
+			glUniform3f(shader["color"], color.r, color.g, color.b);
+			glUniform1f(shader["fade_alpha"], (float)std::min(1.0f, local_time));
 			glUniform1f(shader["uniform_has_texture"], (geometry->parts[j].textureID > 0) ? 1.0f : 0.0f);
 			glBindTexture(GL_TEXTURE_2D, geometry->parts[j].textureID);
 

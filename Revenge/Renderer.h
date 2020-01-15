@@ -44,6 +44,7 @@ protected:
 	class GeometryNode* right_foot;
 	class GeometryNode* hand;
 	class GeometryNode* body;
+	class GeometryNode*	rock;
 	class GeometryNode*								treasure;
 	glm::mat4										treasure_transformation_matrix;
 	glm::mat4										treasure_transformation_normal_matrix;

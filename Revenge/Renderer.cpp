@@ -24,13 +24,10 @@ i32 tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				0, 0, 0, 1 ,1, 1, 1, 0, 0, 0,
 				0, 0, 0, 0 ,0, 0, 0, 0, 0, 0
 			   };
-std::vector<glm::vec2> path2 = { {0,0},{1,0},{2,0},{3,0},{3,1},{4,1},{5,1},{6,1},{7,1},{7,2}, {7,3}, {8,3}, {8,4}, {8,5}, {8,6}, {7,6}, 
-{6,6}, {6,7}, {5,7},{4,7},{3,7}, {3,8},{3,9},{2,9}, {1,9}, {1,8}, {1,7}, {1,6}, {0,6} }; //just a test must be replaced by the real routing function
 
 std::vector<glm::vec2> path = { {0,0},{0,1},{0,2},{0,3},{1,3},{1,4},{1,5},{1,6},{1,7},{2,7}, {3,7}, {3,8}, {4,8}, {5,8}, {6,8}, {6,7}, 
 {6,6}, {7,6}, {7,5},{7,4},{7,3}, {8,3},{9,3},{9,2}, {9,1}, {8,1}, {7,1}, {6,1}, {6,0} }; 
 
-std::vector<i32> turn = {0,0,0,0,1,-1,0,0,0,1,0,-1,1,0,0,1,0,0,-1,1,0,0,-1,-1,1,0,0,0,0,0,1};
 i32 tilemap_width = 10;
 i32 tilemap_height = 10;
 Entity* skeleton_no_anim = NULL;
@@ -202,6 +199,7 @@ bool Renderer::InitRenderingTechniques()
 	m_tower_rendering_program.LoadUniform("diffuse_texture");
 	m_tower_rendering_program.LoadUniform("uniform_camera_position");
 	m_tower_rendering_program.LoadUniform("fade_alpha");
+	m_tower_rendering_program.LoadUniform("color");
 	// Light Source Uniforms
 	m_tower_rendering_program.LoadUniform("uniform_light_position");
 	m_tower_rendering_program.LoadUniform("uniform_light_direction");
@@ -370,8 +368,6 @@ bool Renderer::InitGeometricMeshes()
 	}
 
 
-
-
 	skeleton_no_anim = new Pirate(body, hand, left_foot, right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
 	skeleton_no_anim->active = false;
 	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
@@ -523,14 +519,11 @@ void Renderer::RenderGeometry()
 
 
 
-	//skeleton_no_anim->Render(m_geometry_rendering_program);
 	tile->Render(m_geometry_rendering_program);
-	//cannonball->Render(m_geometry_rendering_program);
-	for (auto t : Tower::towers)if(t!=NULL)t->Render(m_geometry_rendering_program);
+	for (auto t : Tower::towers)if(t!=NULL)t->Render(m_tower_rendering_program);
 	for (auto p : Pirate::pirates)if(p!=NULL)p->Render(m_geometry_rendering_program);
 	for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 	for (auto m : Meteor::meteors)if(m!=NULL)m->Render(m_geometry_rendering_program);
-	//for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 	chest->Render(m_geometry_rendering_program);
 
 

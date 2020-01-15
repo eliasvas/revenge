@@ -2,6 +2,7 @@
 #include "GeometricMesh.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "TextureManager.h"
+#include <iostream>
 
 
 GeometryNode::GeometryNode()

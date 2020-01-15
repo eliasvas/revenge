@@ -13,4 +13,4 @@ newmtl 01___Default
 	Ks 0.00000 0.00000 0.00000
 	Ke 0.00000 0.00000 0.00000
 	
-	map_Kd terrain_texture.jpg
+	map_Kd terrain_texture.png
