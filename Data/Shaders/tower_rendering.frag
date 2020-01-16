@@ -54,6 +54,7 @@ void main(void)
 	vec4 diffuseColor = vec4(uniform_diffuse.rgb, 1);
 	// if we provide a texture, multiply color with the color of the texture
 	diffuseColor = mix( diffuseColor, diffuseColor * texture(diffuse_texture, f_texcoord), uniform_has_texture);
+	if (texture(diffuse_texture, f_texcoord).r <0.1 && texture(diffuse_texture, f_texcoord).g < 0.1 && texture(diffuse_texture, f_texcoord).b < 0.1)diffuseColor = vec4(color,1);
 	
 	// compute the direction to the light source
 	vec3 vertex_to_light_direction = normalize(uniform_light_position - f_position_wcs.xyz);
@@ -78,5 +79,6 @@ void main(void)
 	vec3 specularReflection = (NdotL > 0.0)? irradiance * specularNormalization * uniform_specular * pow( NdotH, uniform_shininess + 0.001) : vec3(0);
 	
 	out_color = vec4( diffuseReflection + specularReflection, texture(diffuse_texture, f_texcoord).a);
+	out_color.w = fade_alpha;
 }
 

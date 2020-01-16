@@ -520,34 +520,52 @@ void Renderer::RenderGeometry()
 
 
 	tile->Render(m_geometry_rendering_program);
-	for (auto t : Tower::towers)if(t!=NULL)t->Render(m_tower_rendering_program);
 	for (auto p : Pirate::pirates)if(p!=NULL)p->Render(m_geometry_rendering_program);
 	for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 	for (auto m : Meteor::meteors)if(m!=NULL)m->Render(m_geometry_rendering_program);
 	chest->Render(m_geometry_rendering_program);
 
 
+	m_tower_rendering_program.Bind();
+	// pass the camera properties
+	glUniformMatrix4fv(m_tower_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
+	glUniformMatrix4fv(m_tower_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
+	glUniform3f(m_tower_rendering_program["uniform_camera_position"], m_camera_position.x, m_camera_position.y, m_camera_position.z);
+	
+	// pass the light source parameters
+	light_position = m_spotlight_node.GetPosition();
+	light_direction = m_spotlight_node.GetDirection();
+	light_color = m_spotlight_node.GetColor();
+	glUniform3f(m_tower_rendering_program["uniform_light_position"], light_position.x, light_position.y, light_position.z);
+	glUniform3f(m_tower_rendering_program["uniform_light_direction"], light_direction.x, light_direction.y, light_direction.z);
+	glUniform3f(m_tower_rendering_program["uniform_light_color"], light_color.x, light_color.y, light_color.z);
+	glUniform1f(m_tower_rendering_program["uniform_light_umbra"], m_spotlight_node.GetUmbra());
+	glUniform1f(m_tower_rendering_program["uniform_light_penumbra"], m_spotlight_node.GetPenumbra());
+	
+	// Enable Texture Unit 0
+	glUniform1i(m_tower_rendering_program["uniform_diffuse_texture"], 0);
+	glActiveTexture(GL_TEXTURE0);
 
-
-
-
-
-
-
-	// unbind the vao
-	glBindVertexArray(0);
-	// unbind the shader program
-	m_geometry_rendering_program.Unbind();
+	for (auto t : Tower::towers)if(t!=NULL)t->Render(m_tower_rendering_program);
 
 	if (m_rendering_mode != RENDERING_MODE::TRIANGLES)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// Render Particles
-	// ..
+	/* 
+	m_particle_rendering_program.Bind();
+	glUniformMatrix4fv(m_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
+	glUniformMatrix4fv(m_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
+	m_particle_emitter.Render();
+	glUniformMatrix4fv(m_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
+	glUniformMatrix4fv(m_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
+	m_particle_swirl.Render();
+	m_particle_rendering_program.Unbind();
 
 	glDisable(GL_DEPTH_TEST);
 	glPointSize(1.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	*/
 }
 
 void Renderer::CameraMoveForward(bool enable)

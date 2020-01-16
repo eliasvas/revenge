@@ -146,17 +146,31 @@ struct Pirate : public Entity {
 			}
 
 		}
-	
-
 		if (true) {
 			//transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, 0, -6) * dt * (f32)speed);
-			if (rl >= 25 || rl <= -25) {
+			if (rl >= 25) {
+				leg = !leg;
+				rl = 24.99;
+			}
+			else if (rl <= -25) {
+				rl = -24.99;
 				leg = !leg;
 			}
-			if (x >= 45 || x <= 0) {
+			if (x >= 45) {
 				hand = !hand;
+				x = 44.99;
+				//std::cout << hand << std::endl;
 			}
-			if (b >= 5 || b <= -5) {
+			else if (x <= 0) {
+				hand = !hand;
+				x = 0.01;
+			}
+			if (b >= 5) {
+				b = 4.99;
+				body = !body;
+			}
+			else if (b <= -5) {
+				b = -4.99;
 				body = !body;
 			}
 
@@ -184,15 +198,15 @@ struct Pirate : public Entity {
 			else {
 				b = b - dt * 16;
 			}
-
 		}
 	}
 
 	void Render(ShaderProgram& shader) {
 		if (!active)return;
 		transformation_matrix = glm::rotate(transformation_matrix,facing_direction*((f32)M_PI/2), glm::vec3(0,1,0));
+		transformation_matrix = glm::rotate(transformation_matrix, glm::radians(b), glm::vec3(0, 0, 1));
 		glBindVertexArray(geometry->m_vao);
-		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(glm::rotate(transformation_matrix,glm::radians(b),glm::vec3(0,0,1))));
+		glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_matrix));
 		glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
 		for (i32 j = 0; j < geometry->parts.size(); j++)
 		{
@@ -268,6 +282,7 @@ struct Pirate : public Entity {
 			glDrawArrays(GL_TRIANGLES, geometry_rleg->parts[j].start_offset, geometry_rleg->parts[j].count);
 		}
 
+		transformation_matrix = glm::rotate(transformation_matrix, (-1.f)*glm::radians(b), glm::vec3(0, 0, 1));
 		transformation_matrix = glm::rotate(transformation_matrix,(-1.f)*facing_direction*((f32)M_PI/2), glm::vec3(0,1,0));
 	}
 };
@@ -355,11 +370,12 @@ struct Tower : public Entity {
 	Tower(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag, GeometryNode* b_m) : Entity(geometry, transform, normal, col, tag) {
 		rate = 0.0f;
 		ball_mesh = b_m;
-		color = glm::vec3(0.5f);
+		color = glm::vec3((float)rand()/(float)RAND_MAX,(float)rand()/(float)RAND_MAX,(float)rand()/(float)RAND_MAX);
+		std::cout << glm::to_string(color) << std::endl;
 		towers.push_back(this);
 	}
 	void Update(f32 dt, i32 speed = 1) {
-		local_time += dt;
+		local_time += 3*dt;
 		if (!active|| local_time < 1.0f)return;
 		rate -= dt;
 		for (Pirate* p : Pirate::pirates) {
