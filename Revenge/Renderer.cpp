@@ -143,6 +143,8 @@ void Renderer::Update(f32 dt)
 	for (auto m : Meteor::meteors)if(m!=NULL)m->Update(dt,speed);
 	chest->Update(dt);
 	t->Update(dt);
+	m_particle_emitter.Update(dt);
+	m_particle_swirl.Update(dt);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -226,6 +228,9 @@ bool Renderer::InitRenderingTechniques()
 	initialized = initialized && skybox_rendering_program.CreateProgram();
 	skybox_rendering_program.LoadUniform("uniform_view_matrix");
 	skybox_rendering_program.LoadUniform("uniform_projection_matrix");
+
+	m_particle_emitter.Init();
+	m_particle_swirl.Init();
 
 	return initialized;
 }
@@ -552,11 +557,11 @@ void Renderer::RenderGeometry()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// Render Particles
-	/* 
+	///* 
 	m_particle_rendering_program.Bind();
 	glUniformMatrix4fv(m_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
 	glUniformMatrix4fv(m_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
-	m_particle_emitter.Render();
+	//m_particle_emitter.Render();
 	glUniformMatrix4fv(m_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
 	glUniformMatrix4fv(m_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
 	m_particle_swirl.Render();
@@ -565,7 +570,7 @@ void Renderer::RenderGeometry()
 	glDisable(GL_DEPTH_TEST);
 	glPointSize(1.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	*/
+	//*/
 }
 
 void Renderer::CameraMoveForward(bool enable)

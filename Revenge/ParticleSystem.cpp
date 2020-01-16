@@ -61,8 +61,8 @@ bool ParticleSwirl::Init()
 
 void ParticleSwirl::Update(float dt)
 {
-	float movement_speed = 2.f;
-	const glm::vec3 center(0, 4, 0);
+	float movement_speed = 4.f;
+	const glm::vec3 center(0, 0, 0);
 
 	for (int i = 0; i < m_particles_position.size(); ++i)
 	{
@@ -73,7 +73,7 @@ void ParticleSwirl::Update(float dt)
 		{
 			float random_pos = rand() / (float)RAND_MAX;
 			random_pos *= 2 * 3.14159f;
-			m_particles_position[i] = 0.1f * glm::vec3(sin(random_pos), 0, cos(random_pos)) + center;
+			m_particles_position[i] = 0.3f * glm::vec3(cos(random_pos),0,sin(random_pos)) + center;
 			m_particles_life[i] = rand() / (float)RAND_MAX;
 		}
 		else
@@ -124,9 +124,9 @@ ParticleEmitter::~ParticleEmitter()
 
 bool ParticleEmitter::Init()
 {
-	m_particles_position.resize(120);
-	m_particles_velocity.resize(120);
-	m_particles_life.resize(120, 0.f);
+	m_particles_position.resize(420);
+	m_particles_velocity.resize(420);
+	m_particles_life.resize(420, 0.f);
 
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
@@ -158,7 +158,7 @@ bool ParticleEmitter::Init()
 
 void ParticleEmitter::Update(float dt)
 {
-	float movement_speed = 1.f;
+	float movement_speed = 10.f;
 
 	for (int i = 0; i < m_particles_position.size(); ++i)
 	{

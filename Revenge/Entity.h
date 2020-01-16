@@ -79,6 +79,7 @@ struct Pirate : public Entity {
 	GeometryNode* geometry_rleg;
 	i32 facing_direction = 0;
 	std::vector<glm::vec2> path;
+	glm::vec3 color;
 	f32 time = 0.0f;	
 	f32 time_elapsed = 0.0f;
 	i32 tile = 0;
@@ -106,6 +107,7 @@ struct Pirate : public Entity {
 		this->geometry_rleg = geometry_rleg;
 		this->path = path;
 		transformation_matrix = glm::translate(transformation_matrix, glm::vec3(0, -2, 0));
+		color = glm::vec3((float)rand()/(float)RAND_MAX,(float)rand()/(float)RAND_MAX,(float)rand()/(float)RAND_MAX);
 		pirates.push_back(this);
 	}
 	void Update(f32 dt, i32 speed = 1) {
@@ -216,7 +218,9 @@ struct Pirate : public Entity {
 
 			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+			glUniform3f(shader["color"], color.r, color.g, color.b);
 			glUniform1f(shader["uniform_shininess"], shininess);
+			glUniform1f(shader["fade_alpha"], 1.0f);
 			glUniform1f(shader["uniform_has_texture"], (geometry->parts[j].textureID > 0) ? 1.0f : 0.0f);
 			glBindTexture(GL_TEXTURE_2D, geometry->parts[j].textureID);
 
@@ -371,7 +375,6 @@ struct Tower : public Entity {
 		rate = 0.0f;
 		ball_mesh = b_m;
 		color = glm::vec3((float)rand()/(float)RAND_MAX,(float)rand()/(float)RAND_MAX,(float)rand()/(float)RAND_MAX);
-		std::cout << glm::to_string(color) << std::endl;
 		towers.push_back(this);
 	}
 	void Update(f32 dt, i32 speed = 1) {
