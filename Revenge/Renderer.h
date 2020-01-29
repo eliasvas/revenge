@@ -8,6 +8,7 @@
 #include "SpotlightNode.h"
 #include "ParticleSystem.h"
 #include "Skybox.h"
+#include "particle_system.h"
 
 class Renderer
 {
@@ -78,11 +79,13 @@ protected:
 	ShaderProgram								m_geometry_rendering_program;
 	ShaderProgram								m_tower_rendering_program;
 	ShaderProgram								skybox_rendering_program;
+	ShaderProgram								textured_particle_rendering_program;
 
 	ParticleEmitter								m_particle_emitter;
 	ParticleSwirl								m_particle_swirl;
 	ShaderProgram								m_particle_rendering_program;
 	Skybox*										skybox;
+	particle_array								particle1;
 
 public:
 	Renderer();

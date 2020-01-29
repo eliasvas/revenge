@@ -144,11 +144,13 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OBJLoader.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
+    <ClCompile Include="particle_system.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SpotlightNode.cpp" />
     <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="text_rendering.cpp" />
     <ClCompile Include="Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,10 +160,12 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="OBJLoader.h" />
     <ClInclude Include="ParticleSystem.h" />
+    <ClInclude Include="particle_system.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SpotlightNode.h" />
+    <ClInclude Include="stb_ds.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="text_rendering.h" />

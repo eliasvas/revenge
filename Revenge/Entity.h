@@ -167,8 +167,8 @@ struct Pirate : public Entity {
 				hand = !hand;
 				x = 0.01;
 			}
-			if (b >= 5) {
-				b = 4.99;
+			if (b >= 10) {
+				b = 9.99;
 				body = !body;
 			}
 			else if (b <= -5) {

@@ -11,6 +11,7 @@
 #include "OBJLoader.h"
 #include "CircleCollider.h"
 #include "time.h"
+#include "particle_system.h"
 #include "Timed_Spawner.h"
 
 i32 tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
@@ -143,8 +144,9 @@ void Renderer::Update(f32 dt)
 	for (auto m : Meteor::meteors)if(m!=NULL)m->Update(dt,speed);
 	chest->Update(dt);
 	t->Update(dt);
-	m_particle_emitter.Update(dt);
-	m_particle_swirl.Update(dt);
+	//m_particle_emitter.Update(dt);
+	//m_particle_swirl.Update(dt);
+	update_textured_particle(&particle1, dt, speed);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -218,6 +220,7 @@ bool Renderer::InitRenderingTechniques()
 	initialized = initialized && m_particle_rendering_program.CreateProgram();
 	m_particle_rendering_program.LoadUniform("uniform_view_matrix");
 	m_particle_rendering_program.LoadUniform("uniform_projection_matrix");
+	m_particle_rendering_program.LoadUniform("alpha");
 
 
 	//skybox rendering program
@@ -229,8 +232,24 @@ bool Renderer::InitRenderingTechniques()
 	skybox_rendering_program.LoadUniform("uniform_view_matrix");
 	skybox_rendering_program.LoadUniform("uniform_projection_matrix");
 
+	//textured particle rendering program
+	vertex_shader_path = "../Data/Shaders/textured_particle_rendering.vert";
+	fragment_shader_path = "../Data/Shaders/textured_particle_rendering.frag";
+	textured_particle_rendering_program.LoadVertexShaderFromFile(vertex_shader_path.c_str());
+	textured_particle_rendering_program.LoadFragmentShaderFromFile(fragment_shader_path.c_str());
+	initialized = initialized && textured_particle_rendering_program.CreateProgram();
+	textured_particle_rendering_program.LoadUniform("uniform_view_matrix");
+	textured_particle_rendering_program.LoadUniform("uniform_projection_matrix");
+	textured_particle_rendering_program.LoadUniform("alpha");
+	textured_particle_rendering_program.LoadUniform("offset");
+	textured_particle_rendering_program.LoadUniform("scale");
+
+
+	
+
 	m_particle_emitter.Init();
 	m_particle_swirl.Init();
+	init_textured_particle(&particle1,"../Data/Various/coin.png");
 
 	return initialized;
 }
@@ -424,7 +443,7 @@ void Renderer::RenderGeometry()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	glEnable(GL_DEPTH_TEST);
 	
-	// render only poi32s, lines, triangles
+	// render only points, lines, triangles
 	switch (m_rendering_mode)
 	{
 	case RENDERING_MODE::TRIANGLES:
@@ -440,6 +459,7 @@ void Renderer::RenderGeometry()
 	};
 	//we need to first disable the glDepthTest so as to draw only 
 	//on the color buffer
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	skybox_rendering_program.Bind();
 	glUniformMatrix4fv(skybox_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
@@ -556,16 +576,16 @@ void Renderer::RenderGeometry()
 	if (m_rendering_mode != RENDERING_MODE::TRIANGLES)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	// Render Particles
 	///* 
-	m_particle_rendering_program.Bind();
-	glUniformMatrix4fv(m_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
-	glUniformMatrix4fv(m_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
-	//m_particle_emitter.Render();
-	glUniformMatrix4fv(m_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
-	glUniformMatrix4fv(m_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
-	m_particle_swirl.Render();
-	m_particle_rendering_program.Unbind();
+	textured_particle_rendering_program.Bind();
+	glUniformMatrix4fv(textured_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
+	glUniformMatrix4fv(textured_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D,particle1.texture);
+
+	render_textured_particle(&particle1, textured_particle_rendering_program);
 
 	glDisable(GL_DEPTH_TEST);
 	glPointSize(1.0);

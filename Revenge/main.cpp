@@ -9,8 +9,13 @@
 #include "Renderer.h"
 #include <thread>         // std::this_thread::sleep_for
 #include "Tools.h"
+#define STBDS_NO_SHORT_NAMES
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define STB_DS_IMPLEMENTATION
+#include "stb_ds.h"
+#include "text_rendering.h"
+#include "particle_system.h"
 using namespace std;
 
 //Screen attributes

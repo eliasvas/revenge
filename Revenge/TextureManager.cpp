@@ -1,6 +1,7 @@
 #include "TextureManager.h"
 #include <algorithm>
 #include "SDL2/SDL_image.h"
+#include <iostream>
 
 // Texture
 TextureManager::TextureManager()
