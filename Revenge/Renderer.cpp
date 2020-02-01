@@ -166,26 +166,30 @@ bool Renderer::InitRenderingTechniques()
 	bool initialized = true;
 
 	std::string vertex_shader_path = "../Data/Shaders/basic_rendering.vert";
-	std::string fragment_shader_path = "../Data/Shaders/basic_rendering.frag";
-	m_geometry_rendering_program.LoadVertexShaderFromFile(vertex_shader_path.c_str());
-	m_geometry_rendering_program.LoadFragmentShaderFromFile(fragment_shader_path.c_str());
-	m_geometry_rendering_program.CreateProgram();
-	m_geometry_rendering_program.LoadUniform("uniform_projection_matrix");
-	m_geometry_rendering_program.LoadUniform("uniform_view_matrix");
-	m_geometry_rendering_program.LoadUniform("uniform_model_matrix");
-	m_geometry_rendering_program.LoadUniform("uniform_normal_matrix");
-	m_geometry_rendering_program.LoadUniform("uniform_diffuse");
-	m_geometry_rendering_program.LoadUniform("uniform_specular");
-	m_geometry_rendering_program.LoadUniform("uniform_shininess");
-	m_geometry_rendering_program.LoadUniform("uniform_has_texture");
-	m_geometry_rendering_program.LoadUniform("diffuse_texture");
-	m_geometry_rendering_program.LoadUniform("uniform_camera_position");
-	// Light Source Uniforms
-	m_geometry_rendering_program.LoadUniform("uniform_light_position");
-	m_geometry_rendering_program.LoadUniform("uniform_light_direction");
-	m_geometry_rendering_program.LoadUniform("uniform_light_color");
-	m_geometry_rendering_program.LoadUniform("uniform_light_umbra");
-	m_geometry_rendering_program.LoadUniform("uniform_light_penumbra");
+    std::string fragment_shader_path = "../Data/Shaders/basic_rendering.frag";
+    m_geometry_rendering_program.LoadVertexShaderFromFile(vertex_shader_path.c_str());
+    m_geometry_rendering_program.LoadFragmentShaderFromFile(fragment_shader_path.c_str());
+    m_geometry_rendering_program.CreateProgram();
+    m_geometry_rendering_program.LoadUniform("uniform_projection_matrix");
+    m_geometry_rendering_program.LoadUniform("uniform_view_matrix");
+    m_geometry_rendering_program.LoadUniform("uniform_model_matrix");
+    m_geometry_rendering_program.LoadUniform("uniform_normal_matrix");
+    m_geometry_rendering_program.LoadUniform("uniform_diffuse");
+    m_geometry_rendering_program.LoadUniform("uniform_specular");
+    m_geometry_rendering_program.LoadUniform("uniform_shininess");
+    m_geometry_rendering_program.LoadUniform("uniform_has_texture");
+    m_geometry_rendering_program.LoadUniform("diffuse_texture");
+    m_geometry_rendering_program.LoadUniform("uniform_camera_position");
+    // Light Source Uniforms
+    m_geometry_rendering_program.LoadUniform("uniform_light_projection_matrix");
+    m_geometry_rendering_program.LoadUniform("uniform_light_view_matrix");
+    m_geometry_rendering_program.LoadUniform("uniform_light_position");
+    m_geometry_rendering_program.LoadUniform("uniform_light_direction");
+    m_geometry_rendering_program.LoadUniform("uniform_light_color");
+    m_geometry_rendering_program.LoadUniform("uniform_light_umbra");
+    m_geometry_rendering_program.LoadUniform("uniform_light_penumbra");
+    m_geometry_rendering_program.LoadUniform("uniform_cast_shadows");
+    m_geometry_rendering_program.LoadUniform("shadowmap_texture");
 
 	vertex_shader_path = "../Data/Shaders/basic_rendering.vert";
 	fragment_shader_path = "../Data/Shaders/tower_rendering.frag";
@@ -244,7 +248,14 @@ bool Renderer::InitRenderingTechniques()
 	textured_particle_rendering_program.LoadUniform("offset");
 	textured_particle_rendering_program.LoadUniform("scale");
 
-
+	vertex_shader_path = "../Data/Shaders/shadow_map_rendering.vert";
+    fragment_shader_path = "../Data/Shaders/shadow_map_rendering.frag";
+    shadow_rendering_program.LoadVertexShaderFromFile(vertex_shader_path.c_str());
+    shadow_rendering_program.LoadFragmentShaderFromFile(fragment_shader_path.c_str());
+    initialized = initialized && shadow_rendering_program.CreateProgram();
+    shadow_rendering_program.LoadUniform("uniform_projection_matrix");
+    shadow_rendering_program.LoadUniform("uniform_view_matrix");
+    shadow_rendering_program.LoadUniform("uniform_model_matrix");
 	
 
 	m_particle_emitter.Init();
@@ -423,6 +434,7 @@ void Renderer::Render()
 {
 	//render the skybox
 	//then draw the geometry
+	RenderShadowMap();
 	RenderGeometry();
 
 	GLenum error = Tools::CheckGLError();
@@ -479,15 +491,24 @@ void Renderer::RenderGeometry()
 	glm::vec3 light_position = m_spotlight_node.GetPosition();
 	glm::vec3 light_direction = m_spotlight_node.GetDirection();
 	glm::vec3 light_color = m_spotlight_node.GetColor();
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_light_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_spotlight_node.GetProjectionMatrix()));
+	glUniformMatrix4fv(m_geometry_rendering_program["uniform_light_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_spotlight_node.GetViewMatrix()));
 	glUniform3f(m_geometry_rendering_program["uniform_light_position"], light_position.x, light_position.y, light_position.z);
 	glUniform3f(m_geometry_rendering_program["uniform_light_direction"], light_direction.x, light_direction.y, light_direction.z);
 	glUniform3f(m_geometry_rendering_program["uniform_light_color"], light_color.x, light_color.y, light_color.z);
 	glUniform1f(m_geometry_rendering_program["uniform_light_umbra"], m_spotlight_node.GetUmbra());
 	glUniform1f(m_geometry_rendering_program["uniform_light_penumbra"], m_spotlight_node.GetPenumbra());
-	
+	glUniform1i(m_geometry_rendering_program["uniform_cast_shadows"], (m_spotlight_node.GetCastShadowsStatus()) ? 1 : 0);
+	// Set the sampler2D uniform to use texture unit 1
+	glUniform1i(m_geometry_rendering_program["shadowmap_texture"], 1);
+	// Bind the shadow map texture to texture unit 1
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, (m_spotlight_node.GetCastShadowsStatus()) ? m_spotlight_node.GetShadowMapDepthTexture() : 0);
 	// Enable Texture Unit 0
 	glUniform1i(m_geometry_rendering_program["uniform_diffuse_texture"], 0);
 	glActiveTexture(GL_TEXTURE0);
+
+
 
 	//Draw Tiles 
 	glm::mat4 transform = terrain_transformation_matrix;
@@ -667,6 +688,74 @@ void Renderer::SpawnPirate() {
 	Entity* skeleton_no_anim = new Pirate(body, hand, left_foot, right_foot, skeleton_transformation_matrix, skeleton_transformation_normal_matrix, new CircleCollider(1.0f, glm::vec3(0, 0.5, 0)), "pirate", path);
 }
 
+void Renderer::RenderShadowMap() {
+    if (m_spotlight_node.GetCastShadowsStatus()) {
+
+        int m_depth_texture_resolution = m_spotlight_node.GetShadowMapResolution();
+
+        // bind the framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, m_spotlight_node.GetShadowMapFBO());
+        glViewport(0, 0, m_depth_texture_resolution, m_depth_texture_resolution);
+        GLenum drawbuffers[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, drawbuffers);
+
+        // clear depth buffer
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+
+        // Bind the shadow mapping program
+        shadow_rendering_program.Bind();
+
+        // pass the projection and view matrix to the uniforms
+        glUniformMatrix4fv(shadow_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_spotlight_node.GetProjectionMatrix()));
+        glUniformMatrix4fv(shadow_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_spotlight_node.GetViewMatrix()));
+
+        DrawGeometryNodeToShadowMap();
+
+        glBindVertexArray(0);
+
+        // Unbind shadow mapping program
+        shadow_rendering_program.Unbind();
+
+        glDisable(GL_DEPTH_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+}
+void Renderer::DrawGeometryNodeToShadowMap(){
+    for (auto t : Tower::towers)if (t != NULL) {
+        glBindVertexArray(t->geometry->m_vao);
+        glUniformMatrix4fv(shadow_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(t->transformation_matrix));
+        for (int j = 0; j < t->geometry->parts.size(); j++)
+        {
+            glDrawArrays(GL_TRIANGLES, t->geometry->parts[j].start_offset, t->geometry->parts[j].count);
+        }
+    }
+    for (auto p : Pirate::pirates)if (p != NULL) {
+        glBindVertexArray(p->geometry->m_vao);
+        glUniformMatrix4fv(shadow_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(p->transformation_matrix));
+        for (int j = 0; j < p->geometry->parts.size(); j++)
+        {
+            glDrawArrays(GL_TRIANGLES, p->geometry->parts[j].start_offset, p->geometry->parts[j].count);
+        }
+    }
+    for (auto c : CannonBall::balls)if (c != NULL){
+        glBindVertexArray(c->geometry->m_vao);
+        glUniformMatrix4fv(shadow_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(c->transformation_matrix));
+        for (int j = 0; j < c->geometry->parts.size(); j++)
+        {
+            glDrawArrays(GL_TRIANGLES, c->geometry->parts[j].start_offset, c->geometry->parts[j].count);
+        }
+    }
+    for (auto m : Meteor::meteors)if (m != NULL) {
+        glBindVertexArray(m->geometry->m_vao);
+        glUniformMatrix4fv(shadow_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(m->transformation_matrix));
+        for (int j = 0; j < m->geometry->parts.size(); j++)
+        {
+            glDrawArrays(GL_TRIANGLES, m->geometry->parts[j].start_offset, m->geometry->parts[j].count);
+        }
+    }
+
+}
 
 
 

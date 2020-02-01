@@ -68,6 +68,11 @@ protected:
 	glm::mat4										skeleton_transformation_matrix;
 	glm::mat4										skeleton_transformation_normal_matrix;
 
+	GLuint m_fbo;
+	GLuint m_fbo_depth_texture;
+	GLuint m_fbo_texture;
+	
+	GLuint m_vao_fbo, m_vbo_fbo_vertices;
 
 	// Protected Functions
 	bool InitRenderingTechniques();
@@ -80,6 +85,8 @@ protected:
 	ShaderProgram								m_tower_rendering_program;
 	ShaderProgram								skybox_rendering_program;
 	ShaderProgram								textured_particle_rendering_program;
+	ShaderProgram								shadow_rendering_program;
+	ShaderProgram								m_postprocess_program;
 
 	ParticleEmitter								m_particle_emitter;
 	ParticleSwirl								m_particle_swirl;
@@ -98,7 +105,9 @@ public:
 
 	// Passes
 	void										RenderGeometry();
-	
+	void										RenderShadowMap();
+	void										DrawGeometryNodeToShadowMap();
+
 	// Set functions
 	void										SetRenderingMode(RENDERING_MODE mode);
 
@@ -114,6 +123,7 @@ public:
 	void RemoveTower();
 	void SpawnPirate();
 	void SpawnMeteor();
+	void RenderToOutFB();
 };
 
 #endif

@@ -12,17 +12,59 @@ uniform sampler2D diffuse_texture;
 uniform vec3 uniform_camera_position;
 
 // Light Source Properties
+uniform mat4 uniform_light_projection_matrix;
+uniform mat4 uniform_light_view_matrix;
 uniform vec3 uniform_light_position;
 uniform vec3 uniform_light_direction;
 uniform vec3 uniform_light_color;
 uniform float uniform_light_umbra;
 uniform float uniform_light_penumbra;
+uniform int uniform_cast_shadows;
+uniform sampler2D shadowmap_texture;
+
+float uniform_constant_bias = 0.0001;
 
 in vec2 f_texcoord;
 in vec3 f_position_wcs;
 in vec3 f_normal;
 
 #define PI 3.14159
+
+float shadow_nearest(vec3 light_space_xyz)
+{
+    // sample shadow map
+    float shadow_map_z = texture2D(shadowmap_texture, light_space_xyz.xy).r;
+
+    // + shaded -> 0.0 
+    // - lit -> 1.0
+    return (light_space_xyz.z - uniform_constant_bias < shadow_map_z) ? 1.0 : 0.0;
+}
+
+
+// 1 sample per pixel
+float shadow(vec3 pwcs)
+{
+    // project the pwcs to the light source point of view
+    vec4 plcs = uniform_light_projection_matrix * uniform_light_view_matrix * vec4(pwcs, 1.0);
+    // perspective division
+    plcs /= plcs.w;
+    // convert from [-1 1] to [0 1]
+    plcs.xy = (plcs.xy + 1) * 0.5;
+    
+    // check that we are inside light clipping frustum
+    if (plcs.x < 0.0) return 0.0;
+    if (plcs.y < 0.0) return 0.0;
+    if (plcs.x > 1.0) return 0.0;
+    if (plcs.y > 1.0) return 0.0;
+
+    // set scale of light space z vaule to [0, 1]
+    plcs.z = 0.5 * plcs.z + 0.5;
+
+    
+    // sample shadow map
+    return shadow_nearest(plcs.xyz);
+    //return shadow_pcf2x2(plcs.xyz);
+}
 
 float compute_spotlight(vec3 vertex_to_light_direction)
 {
@@ -47,6 +89,7 @@ float compute_spotlight(vec3 vertex_to_light_direction)
 
 void main(void) 
 {
+	float shadow_value = (uniform_cast_shadows == 1)? shadow(f_position_wcs.xyz) : 1.0;
 	vec3 normal = normalize(f_normal);
 	
 	vec4 diffuseColor = vec4(uniform_diffuse.rgb, 1);
