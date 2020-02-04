@@ -261,6 +261,7 @@ bool Renderer::InitRenderingTechniques()
 	m_particle_emitter.Init();
 	m_particle_swirl.Init();
 	init_textured_particle(&particle1,"../Data/Various/coin.png");
+	init_text2D(&font, "../Data/Various/font.png");
 
 	return initialized;
 }
@@ -608,7 +609,17 @@ void Renderer::RenderGeometry()
 
 	render_textured_particle(&particle1, textured_particle_rendering_program);
 
-	glDisable(GL_DEPTH_TEST);
+	glm::mat4 view = m_view_matrix;
+	view[3][0] = -0.5f;
+	view[3][1] = -1.5f;
+	view[3][2] = -1.f;
+	glUniformMatrix4fv(textured_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(view));
+	glm::mat4 proj = glm::mat4(1.0f);
+	proj[3][2] = 1.f;
+	glUniformMatrix4fv(textured_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(proj));
+	glDisable(GL_DEPTH_TEST);   //so we can just write straight to the color buffer
+	render_text2D(&font,"MBCD",0,1,256, textured_particle_rendering_program);
+
 	glPointSize(1.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//*/

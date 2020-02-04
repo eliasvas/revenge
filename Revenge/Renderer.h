@@ -9,6 +9,8 @@
 #include "ParticleSystem.h"
 #include "Skybox.h"
 #include "particle_system.h"
+#include "text_rendering.h"
+
 
 class Renderer
 {
@@ -93,6 +95,7 @@ protected:
 	ShaderProgram								m_particle_rendering_program;
 	Skybox*										skybox;
 	particle_array								particle1;
+	font_map									font;
 
 public:
 	Renderer();

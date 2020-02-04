@@ -2,6 +2,14 @@
 #include "stb_image.h"
 #include <cstdlib>
 
+f32 vertices2[] = {
+        // positions  // texture coords
+         0.5f,  0.5f, 0.0f,3.0f/16.0f, 1.f/16.f, // top right
+         0.5f, -0.5f, 0.0f,3.0f/16.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,2.f/16.f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,2.f/16.f, 1.f/16.f  // top left 
+};
+
 f32 vertices[] = {
         // positions  // texture coords
          0.5f,  0.5f, 0.0f,1.0f, 1.0f, // top right

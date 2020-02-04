@@ -430,7 +430,7 @@ struct Treasure : public Entity {
 		//pri32f("%i\n", money);
 		if (money <= 0) {
 			printf("Game Over!");
-			exit(0);
+			//exit(0);
 		}
 		for (Pirate* p : Pirate::pirates) {
 				if (p == NULL)continue;
