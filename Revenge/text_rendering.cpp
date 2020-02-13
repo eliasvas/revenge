@@ -3,17 +3,17 @@
 #include "ShaderProgram.h"
 #include "glm/gtc/type_ptr.hpp"
 
-f32 f_positions_old[] = {
-         0.5f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f 
-};
 f32 f_positions[] = {
          0.5f,  0.5f, 0.0f,
          0.5f, -0.5f, 0.0f,
         -0.5f, -0.5f, 0.0f,
         -0.5f,  0.5f, 0.0f 
+};
+f32 f_positions_5[] = {
+         1.0f,  1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f 
 };
 u32 f_indices[] = {  
         0, 1, 3, 

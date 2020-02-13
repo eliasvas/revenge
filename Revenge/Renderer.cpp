@@ -36,6 +36,7 @@ i32 tilemap_height = 10;
 Entity* skeleton_no_anim = NULL;
 Entity* tile = NULL;
 Entity* cannonball = NULL;
+Entity* sign_ent= NULL;
 Entity* chest = NULL;
 Timed_Spawner* t;
 Pirate* p1;
@@ -376,6 +377,14 @@ bool Renderer::InitGeometricMeshes()
 		tower = new GeometryNode();
 		tower->Init(mesh);
 	}
+
+	mesh = nullptr;
+	mesh = loader.load("../Data/s/objSign.obj");
+	if (mesh != nullptr) {
+		sign = new GeometryNode();
+		sign->Init(mesh);
+	}
+
 	
 	mesh = nullptr;
 	mesh = loader.load("../Data/Various/cannonball.obj");
@@ -433,6 +442,7 @@ bool Renderer::InitGeometricMeshes()
 	skeleton_no_anim = new Pirate(body, hand, left_foot, right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
 	skeleton_no_anim->active = false;
 	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
+	sign_ent = new Entity(sign, glm::translate(glm::scale(skeleton_transformation_matrix,glm::vec3(8.5f,2.5f,4.0f)),glm::vec3(-13,-0.5f,0)), green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "sign");
 	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure", &particle1);
 	p1 = new Pirate(body, hand, left_foot,right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,1)), "pirate",path);
 	p1->active = false;
@@ -598,6 +608,7 @@ void Renderer::RenderGeometry()
 	for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 	for (auto m : Meteor::meteors)if(m!=NULL)m->Render(m_geometry_rendering_program);
 	chest->Render(m_geometry_rendering_program);
+	sign_ent->Render(m_geometry_rendering_program);
 
 
 	m_tower_rendering_program.Bind();
@@ -670,7 +681,7 @@ void Renderer::RenderGeometry()
 	glUniformMatrix4fv(ui_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
 	glUniformMatrix4fv(ui_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(view));
 	
-	render_text2D(&font,s.c_str(),0,0,256, ui_rendering_program);
+	render_text2D(&font,s.c_str(),7.0f,1,256, ui_rendering_program);
 
 	glPointSize(1.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
