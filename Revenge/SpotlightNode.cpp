@@ -12,7 +12,7 @@ SpotLightNode::SpotLightNode()
 	m_light_color = glm::vec3(1.0f);
 	SetPosition(m_light_position);	
 	// umbra and penumbra in degrees
-	SetConeSize(60, 60);
+	SetConeSize(600,600);
 
 	m_cast_shadow = false;
 	m_shadow_map_resolution = 1024;

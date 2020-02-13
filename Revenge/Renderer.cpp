@@ -306,7 +306,7 @@ bool Renderer::InitLightSources()
 	m_spotlight_node.SetTarget(glm::vec3(0, 2, 0));
 
 	m_spotlight_node.SetColor(80.0f * glm::vec3(155, 155, 255) / 255.f); //HERE IS THE LIGHT COLOR CHANGE!!!!!!!!!!!!!!!!!!!!!
-	m_spotlight_node.SetConeSize(500, 700);
+	m_spotlight_node.SetConeSize(130,130);
 	m_spotlight_node.CastShadow(true);
 
 	return true;
@@ -415,7 +415,7 @@ bool Renderer::InitGeometricMeshes()
 	skeleton_no_anim->active = false;
 	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
 	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure", &particle1);
-	p1 = new Pirate(body, hand, left_foot,right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
+	p1 = new Pirate(body, hand, left_foot,right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,1)), "pirate",path);
 	p1->active = false;
 
 
@@ -772,6 +772,7 @@ void Renderer::DrawGeometryNodeToShadowMap(){
         }
     }
     for (auto p : Pirate::pirates)if (p != NULL) {
+		if (!p->active)continue;
         glBindVertexArray(p->geometry->m_vao);
         glUniformMatrix4fv(shadow_rendering_program["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(p->transformation_matrix));
         for (int j = 0; j < p->geometry->parts.size(); j++)
