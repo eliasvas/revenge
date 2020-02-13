@@ -9,7 +9,7 @@ uniform mat4 uniform_projection_matrix;
 uniform vec3 offset;
 uniform vec3 scale;
 
-void main()
+void main_old()
 {
 	mat4 view = uniform_view_matrix;
 	//view[0][0] = -1.0;
@@ -39,7 +39,7 @@ void main()
 }
 
 
-void main_new()
+void main()
 {
 	mat4 view = uniform_view_matrix;
 	//view[0][0] = -1.0;
@@ -55,7 +55,7 @@ void main_new()
 	vec3 CameraUp_worldspace = vec3(view[0][1], view[1][1], view[2][1]);
 	vec4 position_wcs = vec4(aPos, 1.0);
     gl_Position = position_wcs;//uniform_projection_matrix * view * position_wcs;
-	
+	gl_Position.z = -1.0;
 	
     TexCoord = aTexCoord;
 	//TexCoord = vec2((aPos.x+1.0)/2.0,1.0-(aPos.y+1.0)/2.0);

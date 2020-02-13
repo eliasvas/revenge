@@ -336,40 +336,58 @@ struct CannonBall : public Entity {
 	}
 
 };
+
 struct Meteor : public Entity {
-	static std::vector<Meteor*> meteors;
-	glm::vec3 down = {0.0f, -1.5f, 0.0f};
-	glm::vec3 dir;
-	i32 last_pirate_to_collide = 0;
-	f32 active_time; //todo implement logic
-	Meteor(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, glm::vec3 dir,CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag), dir(dir) {
-		Meteor::meteors.push_back(this);
-	}
-	void Update(f32 dt,i32 speed = 1) {
-		if (!active)return;
-		transformation_matrix = glm::translate(transformation_matrix, dir*dt*(f32)speed*30.0f); //find a true relation in terms of speed
+    static std::vector<Meteor*> meteors;
+    glm::vec3 down = {0.0f, -1.5f, 0.0f};
+    glm::vec3 dir;
+    bool col=false;
+    f32 dtcol = 0;
+    i32 last_pirate_to_collide = 0;
+    f32 active_time; //todo implement logic
+    Meteor(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, glm::vec3 dir,CircleCollider* col,std::string tag): Entity(geometry,transform, normal,col,tag), dir(dir) {
+        Meteor::meteors.push_back(this);
+        
+        //this->dir = glm::vec3((normal[3][0]-10)/16.6,-0.6,(normal[3][2]-10)/16.6);
+        //std::cout << normal[3][2] << std::endl;
+    }
+    void Update(f32 dt,i32 speed = 1) {
+        if (!active)return;
+        if (transformation_matrix[3][1] < 0.3)col = true; 
+        if(!col) {
+            transformation_matrix = glm::translate(transformation_matrix, dir * dt * (f32)speed * 2.0f);
+        }
+        //transformation_matrix = glm::translate(transformation_matrix, dir*dt*(f32)speed*2.0f); //find a true relation in terms of speed
+        
+        for (Pirate* p : Pirate::pirates) {
+                if (p == NULL)continue;
+                if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (i32)p) { //HUGE bottleneck
+                    last_pirate_to_collide = (i32)p;
+                    //std::cout << "Collision!!" << std::endl;
+                    p->life= 0;
+                }
+        }
 
-		for (Pirate* p : Pirate::pirates) {
-				if (p == NULL)continue;
-				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (i32)p) { //HUGE bottleneck
-					last_pirate_to_collide = (i32)p;
-					//std::cout << "Collision!!" << std::endl;
-					p->life= 0;
-				}
-		}
+        if (col) {
+            dtcol+= dt;
+            if (dtcol < 0.5) {
+                transformation_matrix = glm::translate(transformation_matrix, dir*glm::vec3(0.6,0.1,0.6) * dt * (f32)speed * 2.0f);
+            }
+            else if(dtcol > 2) {
+                for (i32 i = 0; i < meteors.size(); ++i) {
+                    if (meteors[i] == this) {
+                        delete meteors[i];
+                        meteors[i] = NULL;
+                    }
+                }
 
-		if (transformation_matrix[3][1] < -2) {
-			for (i32 i = 0; i < meteors.size(); ++i) {
-				if (meteors[i] == this) {
-					delete meteors[i];
-					meteors[i] = NULL;
-				}
-			}
-		}
-	}
-	~Meteor() {
-//		balls.erase(this);
-	}
+            }
+        }
+        
+    }
+    ~Meteor() {
+//        balls.erase(this);
+    }
 
 };
 

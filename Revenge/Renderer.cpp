@@ -401,6 +401,12 @@ bool Renderer::InitGeometricMeshes()
 		hand = new GeometryNode();
 		hand->Init(mesh);
 	}
+	mesh = nullptr;
+    mesh = loader.load("../Data/meteor1/Asteroid1.obj");
+    if (mesh != nullptr) {
+        meteor = new GeometryNode();
+        meteor->Init(mesh);
+    }
 
 	mesh = nullptr;
 	mesh = loader.load("../Data/Pirate/pirate_left_foot.obj");
@@ -725,13 +731,16 @@ void Renderer::BuildTower() {
 	auto t1 = new Tower(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(3, glm::vec3(0,0,0)),"tower", ball);
 	((Treasure*)chest)->money -= 100;
 }
+
 void Renderer::SpawnMeteor() {
-	i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
-	i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
-	if (tilemap[x + y * tilemap_width] != 1)return;
-	CircleCollider* c= new CircleCollider(0.5f, glm::vec3(0, 0, 0));
-	auto m = new Meteor(ball,glm::scale(glm::translate(tile->transformation_matrix,glm::vec3(0,30,0)), glm::vec3(0.7,0.7,0.7)),tile->transformation_normal_matrix,glm::vec3(0,-1,0),c,"meteor");
-	((Treasure*)chest)->money -= 200;
+    i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
+    i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
+    if (tilemap[x + y * tilemap_width] != 1)return;
+    CircleCollider* c= new CircleCollider(1.0f, glm::vec3(0, 0, 0));
+    glm::vec3 t_pos= {tile->transformation_matrix[3][0],tile->transformation_matrix[3][1],tile->transformation_matrix[3][2] };
+    glm::vec3 m_pos = {9,10,9};
+    auto m = new Meteor(meteor,glm::scale(glm::translate(tile->transformation_matrix,glm::vec3(9-x*2,10,9-y*2)), glm::vec3(0.5,0.5,0.5)),tile->transformation_normal_matrix,t_pos-m_pos,c,"meteor");
+    ((Treasure*)chest)->money -= 100;
 }
 
 void FindPath(std::vector<glm::vec3>& path_arr, i32* arr, i32 width, i32 height) {

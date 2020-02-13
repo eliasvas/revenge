@@ -3,6 +3,12 @@
 #include "ShaderProgram.h"
 #include "glm/gtc/type_ptr.hpp"
 
+f32 f_positions_old[] = {
+         0.5f,  0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f 
+};
 f32 f_positions[] = {
          0.5f,  0.5f, 0.0f,
          0.5f, -0.5f, 0.0f,

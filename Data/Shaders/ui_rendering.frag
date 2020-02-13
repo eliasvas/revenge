@@ -11,4 +11,9 @@ void main()
     FragColor = texture(ourTexture, TexCoord);
 	if(FragColor.a < 0.01)discard;
 	FragColor.a = 1.f;
+	
+	
+	
+	//-----------------------
+	FragColor = vec4(1.0);
 }

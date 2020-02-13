@@ -44,6 +44,7 @@ protected:
 
 	// Meshes
 	class GeometryNode* left_foot;
+	class GeometryNode* meteor;
 	class GeometryNode* right_foot;
 	class GeometryNode* hand;
 	class GeometryNode* body;
