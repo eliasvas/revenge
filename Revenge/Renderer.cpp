@@ -254,6 +254,19 @@ bool Renderer::InitRenderingTechniques()
 	textured_particle_rendering_program.LoadUniform("offset");
 	textured_particle_rendering_program.LoadUniform("scale");
 
+	//ui rendering program
+	vertex_shader_path = "../Data/Shaders/ui_rendering.vert";
+	fragment_shader_path = "../Data/Shaders/ui_rendering.frag";
+	ui_rendering_program.LoadVertexShaderFromFile(vertex_shader_path.c_str());
+	ui_rendering_program.LoadFragmentShaderFromFile(fragment_shader_path.c_str());
+	initialized = initialized && ui_rendering_program.CreateProgram();
+	ui_rendering_program.LoadUniform("uniform_view_matrix");
+	ui_rendering_program.LoadUniform("uniform_projection_matrix");
+	ui_rendering_program.LoadUniform("alpha");
+	ui_rendering_program.LoadUniform("offset");
+	ui_rendering_program.LoadUniform("scale");
+
+
 	vertex_shader_path = "../Data/Shaders/shadow_map_rendering.vert";
     fragment_shader_path = "../Data/Shaders/shadow_map_rendering.frag";
     shadow_rendering_program.LoadVertexShaderFromFile(vertex_shader_path.c_str());
@@ -448,7 +461,7 @@ void Renderer::Render()
 	GLenum error = Tools::CheckGLError();
 	if (error != GL_NO_ERROR)
 	{
-		printf("Reanderer:Draw GL Error%d\n", error);
+		printf("Renderer:Draw GL Error %d\n", error);
 		system("pause");
 	}
 }
@@ -637,7 +650,6 @@ void Renderer::RenderGeometry()
 	//view[3][2] = -1.f;
 
 	//view[2][3] = 0;
-	view = glm::translate(view, glm::vec3(0, 2.0f, 0));
 	glUniformMatrix4fv(textured_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(view));
 	//glm::mat4 proj = glm::mat4(1.0f);
 	//proj[3][2] = 1.f;
@@ -648,7 +660,11 @@ void Renderer::RenderGeometry()
 	int money = ((Treasure*)chest)->money;
 	std::string s("MONEY: ");
 	s.append(std::to_string(money));
-	render_text2D(&font,s.c_str(),0,0,256, textured_particle_rendering_program);
+	ui_rendering_program.Bind();
+	glUniformMatrix4fv(ui_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
+	glUniformMatrix4fv(ui_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(view));
+	
+	render_text2D(&font,s.c_str(),0,0,256, ui_rendering_program);
 
 	glPointSize(1.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -89,6 +89,7 @@ protected:
 	ShaderProgram								textured_particle_rendering_program;
 	ShaderProgram								shadow_rendering_program;
 	ShaderProgram								m_postprocess_program;
+	ShaderProgram								ui_rendering_program;
 
 	ParticleEmitter								m_particle_emitter;
 	ParticleSwirl								m_particle_swirl;

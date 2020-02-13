@@ -33,5 +33,30 @@ void main()
     gl_Position = uniform_projection_matrix * view * position_wcs;
 	
 	
+	
+	//gl_Position = vec4(aPos,1.0);
+	TexCoord = aTexCoord;
+}
+
+
+void main_new()
+{
+	mat4 view = uniform_view_matrix;
+	//view[0][0] = -1.0;
+	//view[0][1] = 0.0;
+	//view[0][2] = 0.0;
+	//view[1][0] = 0.0;
+	//view[1][1] = 1.0;
+	//view[1][2] = 0.0;
+	//view[2][0] = 0.0;
+	//view[2][1] = 0.0;
+	//view[2][2] = 0.0;
+	vec3 CameraRight_worldspace = vec3(view[0][0], view[1][0], view[2][0]);
+	vec3 CameraUp_worldspace = vec3(view[0][1], view[1][1], view[2][1]);
+	vec4 position_wcs = vec4(aPos, 1.0);
+    gl_Position = position_wcs;//uniform_projection_matrix * view * position_wcs;
+	
+	
     TexCoord = aTexCoord;
+	//TexCoord = vec2((aPos.x+1.0)/2.0,1.0-(aPos.y+1.0)/2.0);
 }

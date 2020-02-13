@@ -15,7 +15,7 @@ SpotLightNode::SpotLightNode()
 	SetConeSize(600,600);
 
 	m_cast_shadow = false;
-	m_shadow_map_resolution = 1024;
+	m_shadow_map_resolution = 2048;
 	m_shadow_map_bias = 0.001f;
 	m_shadow_map_texture = 0;
 	m_shadow_map_fbo = 0;
