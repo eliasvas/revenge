@@ -59,7 +59,7 @@ struct Entity {
 			glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
 			glUniform1f(shader["uniform_shininess"], shininess);
-			glUniform1f(shader["fade_alpha"], 1.0f);
+			//glUniform1f(shader["fade_alpha"], 1.0f);
 			glUniform1f(shader["uniform_has_texture"], (geometry->parts[j].textureID > 0) ? 1.0f : 0.0f);
 			glBindTexture(GL_TEXTURE_2D, geometry->parts[j].textureID);
 
@@ -458,7 +458,6 @@ struct Treasure : public Entity {
 	void Update(f32 dt, i32 speed = 1) {
 		//pri32f("%i\n", money);
 		if (money <= 0) {
-			printf("Game Over!");
 			state = 1;
 			//exit(0);
 		}

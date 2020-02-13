@@ -41,6 +41,7 @@ Entity* chest = NULL;
 Timed_Spawner* t;
 Pirate* p1;
 f32 pirates_to_spawn = 1.0f;
+glm::vec3 plane_color = {255.0f,0.0f,0.0f};
 // RENDERER
 Renderer::Renderer()
 {	
@@ -160,6 +161,15 @@ void Renderer::Update(f32 dt)
 
 	// Update object2 ...
 	// Update object3 ...
+	//change tile color
+	i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
+	i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
+	if (tilemap[x + y * tilemap_width] != 0 || (x + y * tilemap_width) == 3 || (x + y * tilemap_width == 2)) {
+		plane_color = { 255,0,0 };
+	}
+	else {
+		plane_color = { 0,255,0 };
+	}
 
 }
 
@@ -599,17 +609,26 @@ void Renderer::RenderGeometry()
 		transform = terrain_transformation_matrix;
 		transform = glm::translate(transform,glm::vec3(0, 0,2*(y+1)));//x += 2;
 	}
+	sign_ent->Render(m_geometry_rendering_program);
+	if (((Treasure*)chest)->state == 1) //breaks game------
+	{
+		glDisable(GL_DEPTH_TEST);
+		CleanUp();
+		std::string s("YOU LOST!!!");
+		ui_rendering_program.Bind();
+		glUniformMatrix4fv(ui_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
+		glUniformMatrix4fv(ui_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
+		
+		render_text2D(&font,s.c_str(),7.0f,1,256, ui_rendering_program);
+		return;
+	}
 
-	if (((Treasure*)chest)->state == 1)return; //breaks game------
 
-
-	tile->Render(m_geometry_rendering_program);
 	for (auto p : Pirate::pirates)if(p!=NULL)p->Render(m_geometry_rendering_program);
 	for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 	for (auto m : Meteor::meteors)if(m!=NULL)m->Render(m_geometry_rendering_program);
 	chest->Render(m_geometry_rendering_program);
-	sign_ent->Render(m_geometry_rendering_program);
-
+	//tile->Render(m_geometry_rendering_program);
 
 	m_tower_rendering_program.Bind();
 	// pass the camera properties
@@ -631,7 +650,13 @@ void Renderer::RenderGeometry()
 	glUniform1i(m_tower_rendering_program["uniform_diffuse_texture"], 0);
 	glActiveTexture(GL_TEXTURE0);
 
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (auto t : Tower::towers)if(t!=NULL)t->Render(m_tower_rendering_program);
+
+	glUniform1f(m_tower_rendering_program["fade_alpha"], (float)0.5f);
+	glUniform3f(m_tower_rendering_program["color"], plane_color.r, plane_color.g,plane_color.b);
+	tile->Render(m_tower_rendering_program);
 
 	if (m_rendering_mode != RENDERING_MODE::TRIANGLES)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -716,6 +741,7 @@ void Renderer::move_green_plane(glm::vec3 mov) {
 	if (tile->transformation_matrix[3][0] + mov[0] >= 0 && tile->transformation_matrix[3][0] + mov[0] < tilemap_width * 2
 		&& tile->transformation_matrix[3][2] + mov[2] >= 0 && tile->transformation_matrix[3][2] + mov[2] <tilemap_height * 2)
 	tile->transformation_matrix= glm::translate(tile->transformation_matrix, mov);
+	
 }
 
 void Renderer::RemoveTower() {
@@ -737,7 +763,7 @@ void Renderer::RemoveTower() {
 void Renderer::BuildTower() {
 	i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
 	i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
-	if (tilemap[x + y * tilemap_width]!=0)return;
+	if (tilemap[x + y * tilemap_width]!=0 || (x+y*tilemap_width) == 3 || (x+y*tilemap_width == 2) )return;
 	tilemap[x + y * tilemap_width] = 2; //since we are going to make a new tower we are going to prevent further building on the same block
 	auto t1 = new Tower(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(3, glm::vec3(0,0,0)),"tower", ball);
 	((Treasure*)chest)->money -= 100;
