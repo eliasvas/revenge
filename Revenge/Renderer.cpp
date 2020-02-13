@@ -11,8 +11,10 @@
 #include "OBJLoader.h"
 #include "CircleCollider.h"
 #include "time.h"
+#include <string>
 #include "particle_system.h"
 #include "Timed_Spawner.h"
+#include "glm/gtc/matrix_inverse.hpp"
 
 i32 tilemap[]={ 1, 0, 0, 0 ,0, 0, 1, 0, 0, 0,
 				1, 0, 0, 0 ,0, 0, 1, 1, 1, 1,
@@ -107,6 +109,10 @@ bool Renderer::Init(i32 SCREEN_WIDTH, i32 SCREEN_HEIGHT)
 
 void Renderer::Update(f32 dt)
 {
+	if (((Treasure*)chest)->state == 1) {
+		((Treasure*)chest)->state = 0;
+		CleanUp(); //do all the other stuff
+	}
 	t->spawn_instances = (i32)pirates_to_spawn; //ugly AF
 	if (pirates_to_spawn <5.5)
 		pirates_to_spawn += (f32)dt / 20;
@@ -146,7 +152,7 @@ void Renderer::Update(f32 dt)
 	t->Update(dt);
 	//m_particle_emitter.Update(dt);
 	//m_particle_swirl.Update(dt);
-	update_textured_particle(&particle1, dt, speed);
+	update_textured_particle_swoosh(&particle1, dt, speed);
 	// update meshes tranformations
 	
 	// Update object1 ...
@@ -260,7 +266,8 @@ bool Renderer::InitRenderingTechniques()
 
 	m_particle_emitter.Init();
 	m_particle_swirl.Init();
-	init_textured_particle(&particle1,"../Data/Various/coin.png");
+	init_textured_particle_swoosh(&particle1,"../Data/Various/coin.png");
+	particle1.active = 0;
 	init_text2D(&font, "../Data/Various/font.png");
 
 	return initialized;
@@ -407,7 +414,7 @@ bool Renderer::InitGeometricMeshes()
 	skeleton_no_anim = new Pirate(body, hand, left_foot, right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
 	skeleton_no_anim->active = false;
 	tile = new Entity(green_plane, green_plane_transformation_matrix, green_plane_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0,0)), "tile");
-	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure");
+	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure", &particle1);
 	p1 = new Pirate(body, hand, left_foot,right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,0)), "pirate",path);
 	p1->active = false;
 
@@ -564,6 +571,7 @@ void Renderer::RenderGeometry()
 		transform = glm::translate(transform,glm::vec3(0, 0,2*(y+1)));//x += 2;
 	}
 
+	if (((Treasure*)chest)->state == 1)return; //breaks game------
 
 
 	tile->Render(m_geometry_rendering_program);
@@ -602,23 +610,45 @@ void Renderer::RenderGeometry()
 	// Render Particles
 	///* 
 	textured_particle_rendering_program.Bind();
+	glm::mat4 view = m_view_matrix;
+	//view[0][0] = -1.0f;
+	//view[0][1] = 0.0f;
+	//view[0][2] = 0.0f;
+	//view[1][0] = 0.0f;
+	//view[1][1] = 1.0f;
+	//view[1][2] = 0.0f;
+	//view[2][0] = 0.0f;
+	//view[2][1] = 0.0f;
+	//view[2][2] = 1.0f;
+
 	glUniformMatrix4fv(textured_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
-	glUniformMatrix4fv(textured_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(m_view_matrix));
+	glUniformMatrix4fv(textured_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(view));
 	//glActiveTexture(GL_TEXTURE0);
 	//glBindTexture(GL_TEXTURE_2D,particle1.texture);
 
+	
+	glUniformMatrix4fv(textured_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(view));
+
+
 	render_textured_particle(&particle1, textured_particle_rendering_program);
 
-	glm::mat4 view = m_view_matrix;
-	view[3][0] = -0.5f;
-	view[3][1] = -1.5f;
-	view[3][2] = -1.f;
+	//view[3][0] = -0.5f;
+	//view[3][1] = -1.5f;
+	//view[3][2] = -1.f;
+
+	//view[2][3] = 0;
+	view = glm::translate(view, glm::vec3(0, 2.0f, 0));
 	glUniformMatrix4fv(textured_particle_rendering_program["uniform_view_matrix"], 1, GL_FALSE, glm::value_ptr(view));
-	glm::mat4 proj = glm::mat4(1.0f);
-	proj[3][2] = 1.f;
-	glUniformMatrix4fv(textured_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(proj));
+	//glm::mat4 proj = glm::mat4(1.0f);
+	//proj[3][2] = 1.f;
+	//glm::mat4 proj = glm::ortho(1.f,-1.f, 0.1f, 1500.0f); //kati tetoio prepei na gunei
+	glUniformMatrix4fv(textured_particle_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
 	glDisable(GL_DEPTH_TEST);   //so we can just write straight to the color buffer
-	render_text2D(&font,"MBCD",0,1,256, textured_particle_rendering_program);
+
+	int money = ((Treasure*)chest)->money;
+	std::string s("MONEY: ");
+	s.append(std::to_string(money));
+	render_text2D(&font,s.c_str(),0,0,256, textured_particle_rendering_program);
 
 	glPointSize(1.0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -766,6 +796,18 @@ void Renderer::DrawGeometryNodeToShadowMap(){
         }
     }
 
+}
+
+
+void Renderer::CleanUp() {
+	Pirate::pirates.clear();
+	CannonBall::balls.clear();
+	Tower::towers.clear();
+	Meteor::meteors.clear();
+	t->time = 0.0f;
+	pirates_to_spawn = 1.0f;
+	particle1.active = false;
+	//score = 0;
 }
 
 

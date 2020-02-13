@@ -50,7 +50,7 @@ void init_text2D(font_map* arr,const char* texture_path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
+    //stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(texture_path, &width, &height, &nrChannels, 0);
 	//maybe roll image
     if (data)
@@ -70,17 +70,17 @@ void init_text2D(font_map* arr,const char* texture_path) {
 
 void render_text2D(font_map* arr, const char* text, i32 x, i32 y, i32 size, ShaderProgram& shader) {
     //fill font_map with the right uv_coordinates via glSubBufferData (?) 
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < 11; ++i) {
 		int l = text[i];
-		i32 w = l % arr->glyphs_per_row;
-		i32 h = l / arr->glyphs_per_row;
+		i32 w = (l) % arr->glyphs_per_row;
+		i32 h = (l) / arr->glyphs_per_row;
 		uv_coords[0] = glm::ivec2(w + 1, h + 1);
 		uv_coords[1] = glm::ivec2(w + 1, h);
 		uv_coords[2] = glm::ivec2(w, h);
-		uv_coords[3] = glm::ivec2(w, h + 1);
-		for (int i = 0; i < 4; ++i) {
+		uv_coords[3] = glm::ivec2(w, h +1);
+
+		for (int i = 0; i < 11; ++i) {
 			uv_coords[i] /= arr->glyphs_per_row; //produce the text coordinates
-			uv_coords[i] = 1.f - uv_coords[i];
 		}
 
 		//update vertex attributes ********************
@@ -95,8 +95,8 @@ void render_text2D(font_map* arr, const char* text, i32 x, i32 y, i32 size, Shad
 		glBindVertexArray(arr->vao);
 		glUniform1f(shader["alpha"], 1.f);
 		glUniform1i(shader["ourTexture"], 0);
-		glUniform3f(shader["offset"], x+ 0.1*i, y, 0);
-		glUniform3f(shader["scale"], 0.1f, 0.1f, 1.f);
+		glUniform3f(shader["offset"], x- 0.3*i, y, 0);
+		glUniform3f(shader["scale"], (-1.f)*0.3f, (-1.f)*0.3f, 1.f);
 		//glUniformMatrix4fv(shader["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(projection_matrix)); --put ortho matrix (?)
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);

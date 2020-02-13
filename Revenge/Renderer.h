@@ -127,6 +127,7 @@ public:
 	void SpawnPirate();
 	void SpawnMeteor();
 	void RenderToOutFB();
+	void CleanUp();
 };
 
 #endif

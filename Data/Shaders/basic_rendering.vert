@@ -1,4 +1,4 @@
-#version 330 core
+ #version 330 core
 layout(location = 0) in vec3 coord3d;
 layout(location = 1) in vec3 v_normal;
 layout(location = 2) in vec2 texcoord;

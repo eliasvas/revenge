@@ -14,6 +14,7 @@ struct particle_array {
 	glm::vec3 v[10];
 	f32 l[10];
 	float continuous_time;
+	bool active = 1;
 
     GLuint vao, vbo, ebo;
 	GLuint texture;
@@ -31,4 +32,8 @@ void render_textured_particle(particle_array* arr, ShaderProgram& shader);
 
 void update_textured_particle(particle_array* arr, f32 dt, f32 speed);
 
+void update_textured_particle_swoosh(particle_array* arr, f32 dt, f32 speed);
 
+bool init_textured_particle_swoosh(particle_array* arr, const char* texture_path);
+
+void redo_swoosh(particle_array* arr, f32 dt, f32 speed);

@@ -18,6 +18,7 @@
 #include "SDL2/SDL_timer.h"
 #include "algorithm"
 #include "tgmath.h"
+#include "particle_system.h"
 
 enum {
 	UP = 0,
@@ -424,12 +425,16 @@ struct Tower : public Entity {
 struct Treasure : public Entity {
 	i32 last_pirate_to_collide = 0;
 	i32 money = 1000;
-	Treasure(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag) : Entity(geometry, transform, normal, col, tag) {
+	i32 state = 0;
+	particle_array* gen;
+	Treasure(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag, particle_array* p) : Entity(geometry, transform, normal, col, tag) {
+		gen = p;
 	}
 	void Update(f32 dt, i32 speed = 1) {
 		//pri32f("%i\n", money);
 		if (money <= 0) {
 			printf("Game Over!");
+			state = 1;
 			//exit(0);
 		}
 		for (Pirate* p : Pirate::pirates) {
@@ -437,6 +442,7 @@ struct Treasure : public Entity {
 				if (CheckCollision(this, (Entity*)p) && last_pirate_to_collide != (i32)p) { //HUGE bottleneck
 					money -= 100;
 					last_pirate_to_collide = (i32)p;
+					redo_swoosh(gen, dt, 1.0f);
 				}
 		}
 	}
