@@ -42,6 +42,7 @@ Timed_Spawner* t;
 Pirate* p1;
 f32 pirates_to_spawn = 1.0f;
 glm::vec3 plane_color = {255.0f,0.0f,0.0f};
+float tower_timer = 5.0f;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -162,9 +163,10 @@ void Renderer::Update(f32 dt)
 	// Update object2 ...
 	// Update object3 ...
 	//change tile color
+	tower_timer += dt;
 	i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
 	i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
-	if (tilemap[x + y * tilemap_width] != 0 || (x + y * tilemap_width) == 3 || (x + y * tilemap_width == 2)) {
+	if (tilemap[x + y * tilemap_width] != 0 || (x + y * tilemap_width) == 3 || (x + y * tilemap_width == 2) || tower_timer < 5.f) {
 		plane_color = { 255,0,0 };
 	}
 	else {
@@ -763,7 +765,8 @@ void Renderer::RemoveTower() {
 void Renderer::BuildTower() {
 	i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
 	i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
-	if (tilemap[x + y * tilemap_width]!=0 || (x+y*tilemap_width) == 3 || (x+y*tilemap_width == 2) )return;
+	if (tilemap[x + y * tilemap_width]!=0 || (x+y*tilemap_width) == 3 || (x+y*tilemap_width == 2) ||tower_timer < 5.f)return;
+	tower_timer = 0.0f;
 	tilemap[x + y * tilemap_width] = 2; //since we are going to make a new tower we are going to prevent further building on the same block
 	auto t1 = new Tower(tower,glm::scale(tile->transformation_matrix,glm::vec3(0.2,0.2,0.2)), tile->transformation_normal_matrix,new CircleCollider(3, glm::vec3(0,0,0)),"tower", ball);
 	((Treasure*)chest)->money -= 100;
