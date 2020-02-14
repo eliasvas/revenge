@@ -448,6 +448,7 @@ struct Tower : public Entity {
 };
 
 struct Treasure : public Entity {
+	float timer = 0.0f;
 	i32 last_pirate_to_collide = 0;
 	i32 money = 1000;
 	i32 state = 0;
@@ -456,6 +457,7 @@ struct Treasure : public Entity {
 		gen = p;
 	}
 	void Update(f32 dt, i32 speed = 1) {
+		timer += dt;
 		//pri32f("%i\n", money);
 		if (money <= 0) {
 			state = 1;
@@ -469,6 +471,11 @@ struct Treasure : public Entity {
 					redo_swoosh(gen, dt, 1.0f);
 				}
 		}
+		if (timer > 1.f) {
+			timer = 0.0f;
+			++money;
+		}
+		
 	}
 	//void Render();
 	~Treasure() {

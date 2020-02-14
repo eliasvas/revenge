@@ -702,7 +702,7 @@ void Renderer::RenderGeometry()
 	glDisable(GL_DEPTH_TEST);   //so we can just write straight to the color buffer
 
 	int money = ((Treasure*)chest)->money;
-	std::string s("MONEY: ");
+	std::string s("POINTS:");
 	s.append(std::to_string(money));
 	ui_rendering_program.Bind();
 	glUniformMatrix4fv(ui_rendering_program["uniform_projection_matrix"], 1, GL_FALSE, glm::value_ptr(m_projection_matrix));
