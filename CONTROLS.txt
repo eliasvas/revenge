@@ -4,4 +4,4 @@
 [Mouse] Look Around
 [V] Destroy Tower
 [N] Throw Comet
-
+[TAB] options
