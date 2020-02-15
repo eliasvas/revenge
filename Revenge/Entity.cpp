@@ -8,6 +8,7 @@ std::vector<CannonBall*> CannonBall::balls;
 std::vector<Meteor*> Meteor::meteors;
 std::vector<Pirate*> Pirate::pirates;
 std::vector<Tower*> Tower::towers;
+std::vector<Treasure*> Treasure::treasures;
 
 bool CheckCollision(Entity* g1, Entity* g2) {
 	if (g1 == NULL || g2 == NULL)return false;

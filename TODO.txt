@@ -1,7 +1,0 @@
-@make path for skeleton pirates dynamically
-@shadows
-@text rendering --first make a 2D renderer
-@particles
-@animation fixes
-@put correct mesh in meteor
-@load tower shader

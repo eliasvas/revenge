@@ -19,6 +19,7 @@
 #include "algorithm"
 #include "tgmath.h"
 #include "particle_system.h"
+#include"glm/gtx/rotate_vector.hpp"
 
 enum {
 	UP = 0,
@@ -448,6 +449,7 @@ struct Tower : public Entity {
 };
 
 struct Treasure : public Entity {
+	static std::vector<Treasure*> treasures;
 	float timer = 0.0f;
 	i32 last_pirate_to_collide = 0;
 	i32 money = 1000;
@@ -455,6 +457,10 @@ struct Treasure : public Entity {
 	particle_array* gen;
 	Treasure(GeometryNode* geometry, glm::mat4 transform, glm::mat4 normal, CircleCollider* col, std::string tag, particle_array* p) : Entity(geometry, transform, normal, col, tag) {
 		gen = p;
+		treasures.push_back(this);
+	}
+	static void addMoney(i32 amount) {
+		treasures[0] += amount;
 	}
 	void Update(f32 dt, i32 speed = 1) {
 		timer += dt;
@@ -462,6 +468,13 @@ struct Treasure : public Entity {
 		if (money <= 0) {
 			state = 1;
 			//exit(0);
+		}if (money < 800) {
+			delete treasures[treasures.size() - 1];
+			treasures[treasures.size() - 1] = NULL;
+		}
+		if (money < 400) {
+			delete treasures[treasures.size() - 2];
+			treasures[treasures.size() - 2] = NULL;
 		}
 		for (Pirate* p : Pirate::pirates) {
 				if (p == NULL)continue;
@@ -477,6 +490,34 @@ struct Treasure : public Entity {
 		}
 		
 	}
+	/*void Render(ShaderProgram& shader) {
+		if (!active)return;
+		//if (transformation_matrix[3][2] < 0)return; //MUST 
+		float angle = -45.f;
+		for (int i = 1 - (int)(money > 400) - (int)(money > 700); i < 2; ++i) {
+			glm::mat4 plus = glm::rotate(glm::mat4(1.f), angle,glm::vec3(0,1,0));
+			glm::translate(plus, glm::vec3(1.5f * i, 0, 0));
+			angle += 45;
+			glBindVertexArray(geometry->m_vao);
+			glUniformMatrix4fv(shader["uniform_model_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_matrix*plus));
+			glUniformMatrix4fv(shader["uniform_normal_matrix"], 1, GL_FALSE, glm::value_ptr(transformation_normal_matrix));
+			for (i32 j = 0; j < geometry->parts.size(); j++)
+			{
+				glm::vec3 diffuseColor = geometry->parts[j].diffuseColor;
+				glm::vec3 specularColor = geometry->parts[j].specularColor;
+				f32 shininess = geometry->parts[j].shininess;
+
+				glUniform3f(shader["uniform_diffuse"], diffuseColor.r, diffuseColor.g, diffuseColor.b);
+				glUniform3f(shader["uniform_specular"], specularColor.r, specularColor.g, specularColor.b);
+				glUniform1f(shader["uniform_shininess"], shininess);
+				//glUniform1f(shader["fade_alpha"], 1.0f);
+				glUniform1f(shader["uniform_has_texture"], (geometry->parts[j].textureID > 0) ? 1.0f : 0.0f);
+				glBindTexture(GL_TEXTURE_2D, geometry->parts[j].textureID);
+
+				glDrawArrays(GL_TRIANGLES, geometry->parts[j].start_offset, geometry->parts[j].count);
+			}
+		}
+	}*/
 	//void Render();
 	~Treasure() {
 	}

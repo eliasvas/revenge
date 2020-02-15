@@ -5,6 +5,6 @@ uniform float alpha;
 
 void main(void) 
 {
-	out_color = vec4( 1,0.5,0.5, alpha);	
+	out_color = vec4( 0.2,1,0.1, alpha);	
 }
 

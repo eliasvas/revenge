@@ -42,7 +42,6 @@ Timed_Spawner* t;
 Pirate* p1;
 f32 pirates_to_spawn = 1.0f;
 glm::vec3 plane_color = {255.0f,0.0f,0.0f};
-float tower_timer = 5.0f;
 // RENDERER
 Renderer::Renderer()
 {	
@@ -151,6 +150,7 @@ void Renderer::Update(f32 dt)
 	for (auto pirate : Pirate::pirates)if (pirate!=NULL)pirate->Update(dt, speed);
 	for (auto tower : Tower::towers)if (tower!=NULL)tower->Update(dt, speed);
 	for (auto m : Meteor::meteors)if(m!=NULL)m->Update(dt,speed);
+	for (auto tr : Treasure::treasures)if (tr != NULL)tr->Update(dt);
 	chest->Update(dt);
 	t->Update(dt);
 	//m_particle_emitter.Update(dt);
@@ -458,6 +458,13 @@ bool Renderer::InitGeometricMeshes()
 	chest = new Treasure(treasure,treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f,glm::vec3(0,0.5,0)),"treasure", &particle1);
 	p1 = new Pirate(body, hand, left_foot,right_foot,skeleton_transformation_matrix, skeleton_transformation_normal_matrix,new CircleCollider(1.0f, glm::vec3(0,0.5,1)), "pirate",path);
 	p1->active = false;
+	auto tr = new Treasure(treasure, treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f, glm::vec3(0, 0.5, 0)), "treasure", &particle1);
+	treasure_transformation_matrix[3][0] += 1.5;
+	treasure_transformation_matrix = glm::rotate(treasure_transformation_matrix, glm::radians(0.0f), glm::vec3(0, 1, 0)); treasure_transformation_matrix = glm::rotate(treasure_transformation_matrix, glm::radians(-45.0f), glm::vec3(0, 1, 0));
+	tr = new Treasure(treasure, treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f, glm::vec3(0, 0.5, 0)), "treasure", &particle1);
+	treasure_transformation_matrix[3][0] -= 3;
+	treasure_transformation_matrix = glm::rotate(treasure_transformation_matrix, glm::radians(90.0f), glm::vec3(0, 1, 0));
+	tr = new Treasure(treasure, treasure_transformation_matrix, treasure_transformation_normal_matrix, new CircleCollider(1.0f, glm::vec3(0, 0.5, 0)), "treasure", &particle1);
 
 
 	t = new Timed_Spawner(10.0f, (i32)pirates_to_spawn, 1.0f,(Pirate*)p1); //change to size of horde
@@ -629,6 +636,7 @@ void Renderer::RenderGeometry()
 	for (auto p : Pirate::pirates)if(p!=NULL)p->Render(m_geometry_rendering_program);
 	for (auto c : CannonBall::balls)if(c!=NULL)c->Render(m_geometry_rendering_program);
 	for (auto m : Meteor::meteors)if(m!=NULL)m->Render(m_geometry_rendering_program);
+	for (auto tr : Treasure::treasures)if (tr != NULL)tr->Render(m_geometry_rendering_program);
 	chest->Render(m_geometry_rendering_program);
 	//tile->Render(m_geometry_rendering_program);
 
@@ -763,6 +771,7 @@ void Renderer::RemoveTower() {
 }
 
 void Renderer::BuildTower() {
+	if (((Treasure*)chest)->money < 100)return;
 	i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
 	i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
 	if (tilemap[x + y * tilemap_width]!=0 || (x+y*tilemap_width) == 3 || (x+y*tilemap_width == 2) ||tower_timer < 5.f)return;
@@ -772,15 +781,17 @@ void Renderer::BuildTower() {
 	((Treasure*)chest)->money -= 100;
 }
 
-void Renderer::SpawnMeteor() {
+bool Renderer::SpawnMeteor() {
+	if (((Treasure*)chest)->money < 100)return false;
     i32 x = (i32)std::max(0.0f,(tile->transformation_matrix[3][0] / 2));
     i32 y = (i32)std::max(0.0f,(tile->transformation_matrix[3][2] / 2));
-    if (tilemap[x + y * tilemap_width] != 1)return;
+    if (tilemap[x + y * tilemap_width] != 1)return false;
     CircleCollider* c= new CircleCollider(1.0f, glm::vec3(0, 0, 0));
     glm::vec3 t_pos= {tile->transformation_matrix[3][0],tile->transformation_matrix[3][1],tile->transformation_matrix[3][2] };
     glm::vec3 m_pos = {9,10,9};
     auto m = new Meteor(meteor,glm::scale(glm::translate(tile->transformation_matrix,glm::vec3(9-x*2,10,9-y*2)), glm::vec3(0.5,0.5,0.5)),tile->transformation_normal_matrix,t_pos-m_pos,c,"meteor");
     ((Treasure*)chest)->money -= 100;
+	return true;
 }
 
 void FindPath(std::vector<glm::vec3>& path_arr, i32* arr, i32 width, i32 height) {

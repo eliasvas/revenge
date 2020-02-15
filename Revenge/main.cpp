@@ -155,6 +155,7 @@ int main(int argc, char *argv[])
 
 	auto simulation_start = chrono::steady_clock::now();
 	Mix_PlayMusic(music,-1);
+	Mix_Chunk* meteor = Mix_LoadWAV("../Data/Sounds/meteor.mp3");
 	//printf("Mix_PlayMusic: %s\n", Mix_GetError());
 	// Wait for user exit
 	while (quit == false)
@@ -239,7 +240,9 @@ int main(int argc, char *argv[])
 				else if (event.key.keysym.sym == SDLK_c) {
 					renderer->SpawnPirate();
 				}else if (event.key.keysym.sym == SDLK_n) {
-					renderer->SpawnMeteor();
+					if (renderer->SpawnMeteor()) {
+						Mix_PlayChannel(1, meteor, 0);
+					}
 				}
 
 
@@ -276,20 +279,21 @@ int main(int argc, char *argv[])
 					renderer->ResizeBuffers(event.window.data1, event.window.data2);
 				}
 			}
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplSDL2_NewFrame(window);
-			ImGui::NewFrame();
-			if(show_options)
-			{
-				ImGui::Begin("options",0, ImGuiWindowFlags_AlwaysAutoResize);
-				ImGui::Checkbox("anti-aliasing", &antialiasing);
-				ImGui::Checkbox("fullscreen", &fullscreen);
-				ImGui::SliderInt("volume", &music_volume, 0.0f, MIX_MAX_VOLUME);
-				ImGui::SliderInt("speed", &renderer->speed, -32.0f, 32.0f);
-				ImGui::End();
-			}
-			ImGui::Render();
 		}
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplSDL2_NewFrame(window);
+		ImGui::NewFrame();
+		if(show_options)
+		{
+			ImGui::Begin("options",0, ImGuiWindowFlags_AlwaysAutoResize);
+			ImGui::Checkbox("anti-aliasing", &antialiasing);
+			ImGui::Checkbox("fullscreen", &fullscreen);
+			ImGui::SliderInt("volume", &music_volume, 0.0f, MIX_MAX_VOLUME);
+			ImGui::TextUnformatted(std::string("time:"+std::to_string(renderer->m_continous_time)).c_str());
+			ImGui::End();
+		}
+		ImGui::Render();
+
 		// Compute the ellapsed time
 		auto simulation_end = chrono::steady_clock::now();
 		float dt = chrono::duration <float>(simulation_end - simulation_start).count(); // in seconds

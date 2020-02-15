@@ -22,6 +22,8 @@ public:
 		POINTS
 	};
 	int speed = 1;
+	float tower_timer = 5.0f;
+	float m_continous_time;
 protected:
 	int												m_screen_width, m_screen_height;
 	glm::mat4										m_view_matrix;
@@ -34,7 +36,6 @@ protected:
 	// skeleton movement direction
 	glm::vec2										m_skeleton_movement;
 	
-	float m_continous_time;
 
 	// Rendering Mode
 	RENDERING_MODE m_rendering_mode;
@@ -99,6 +100,7 @@ protected:
 	Skybox*										skybox;
 	particle_array								particle1;
 	font_map									font;
+	ParticleEmitter								particle;
 
 public:
 	Renderer();
@@ -128,7 +130,7 @@ public:
 	void BuildTower();
 	void RemoveTower();
 	void SpawnPirate();
-	void SpawnMeteor();
+	bool SpawnMeteor();
 	void RenderToOutFB();
 	void CleanUp();
 };

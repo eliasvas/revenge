@@ -1,0 +1,7 @@
+
+[B] Build Tower
+[WASD] Move Around
+[Mouse] Look Around
+[V] Destroy Tower
+[N] Throw Comet
+
